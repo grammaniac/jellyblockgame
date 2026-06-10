@@ -778,7 +778,50 @@
   .updatebar button:active{ transform:translateY(1px); }
 
   /* ---------- 모션 최소화 설정 존중 ---------- */
+  /* ---------- 캐릭터: 반짝이 & 끄적이 ---------- */
+  .charSprite{
+    position:fixed; z-index:150; pointer-events:none; opacity:0;
+    transition: left .65s cubic-bezier(.45,.05,.35,1.18), top .65s cubic-bezier(.45,.05,.35,1.18), opacity .35s ease;
+    filter: drop-shadow(0 3px 6px rgba(0,0,0,.3));
+  }
+  .charSprite svg{ width:100%; height:100%; display:block; overflow:visible; }
+  .charSprite.bob svg{ animation: charBob 1.1s ease-in-out infinite; }
+  @keyframes charBob{
+    0%,100%{ transform:translateY(0) rotate(-4deg); }
+    50%{ transform:translateY(-10%) rotate(4deg); }
+  }
+  .charSprite.scared svg{ animation: charScared .45s ease; }
+  @keyframes charScared{
+    0%{ transform:scale(1); }
+    35%{ transform:scale(1.28) rotate(14deg); }
+    100%{ transform:scale(1); }
+  }
+  .charSprite .cbadge{
+    position:absolute; top:-7px; right:-7px;
+    background:#fff; color:#1a1a24;
+    border-radius:50%;
+    width:21px; height:21px;
+    display:flex; align-items:center; justify-content:center;
+    font-size:12px; font-weight:900;
+    box-shadow:0 1px 4px rgba(0,0,0,.45);
+  }
+
+  /* ---------- 끄적이의 잉크 낙서 칸 ---------- */
+  .blk.ink{
+    border-radius:34% 38% 32% 40% / 40% 32% 42% 34%;
+    background:
+      radial-gradient(ellipse at 42% 38%, #34343f 0%, #17171f 65%);
+    box-shadow: inset 0 -2px 5px rgba(0,0,0,.55), 0 1px 3px rgba(0,0,0,.3);
+  }
+  .blk .inkno{
+    position:absolute; right:7%; bottom:3%;
+    font-size:10px; font-weight:900;
+    color:rgba(255,255,255,.9);
+  }
+
   @media (prefers-reduced-motion: reduce){
+    .charSprite{ transition:none; }
+    .charSprite.bob svg{ animation:none; }
     .frame.shake{ animation:none; }
     .particle{ display:none; }
     .blk.rainbow{ animation:none; }
@@ -1486,6 +1529,13 @@ document.addEventListener('dblclick', function(event) {
     lastVW = window.innerWidth;
     lastVH = window.innerHeight;
     if(dragData || pending) endGesture();
+    // 화면 크기 변경 시 캐릭터 위치 재계산 (수리 중이면 따라감, 아니면 숨김)
+    if(typeof modeState!=="undefined" && mode==="adventure" && modeState && modeState.kkPending){
+      const kp=modeState.kkPending;
+      setTimeout(()=>{ if(modeState && modeState.kkPending) charFlyToCell("k",kp.r,kp.c,kp.left); }, 80);
+    }else if(typeof hideChars==="function"){
+      hideChars();
+    }
 
     // 인라인 padding-top 을 비워 순수 CSS 기준값(safe-area 포함)부터 다시 측정한다.
     document.body.style.paddingTop = "";
@@ -1531,10 +1581,18 @@ document.addEventListener('dblclick', function(event) {
         cell.classList.remove("ghost","gline","hint-glow");
         const v = board[r][c];
         const blk = cell.querySelector(".blk");
-        blk.classList.remove("rainbow","golden","stone","cracked");
+        blk.classList.remove("rainbow","golden","stone","cracked","ink");
+        const oldNo = blk.querySelector(".inkno");
+        if(oldNo && !(v && v.ink)) oldNo.remove();
         if(v){
           cell.classList.add("filled");
-          if(v.stone){
+          if(v.ink){
+            blk.classList.add("ink");
+            cell.style.setProperty("--c", "#1a1a24");
+            let no = blk.querySelector(".inkno");
+            if(!no){ no=document.createElement("span"); no.className="inkno"; blk.appendChild(no); }
+            no.textContent = v.turns;
+          }else if(v.stone){
             blk.classList.add("stone");
             if(v.hp <= 1) blk.classList.add("cracked");
             cell.style.setProperty("--c", "#74747e");
@@ -2047,7 +2105,7 @@ document.addEventListener('dblclick', function(event) {
           for(let i=0;i<SIZE;i++){
             const v = getCell(i);
             if(!v) return false;
-            if(v.stone) return false; // 돌은 무색 — 같은 색 보너스 불가
+            if(v.stone || v.ink) return false; // 돌·잉크는 무색 — 같은 색 보너스 불가
             if(v.special === SPECIAL_RAINBOW || v.special === SPECIAL_GOLDEN) continue;
             if(common === null) common = v.color;
             else if(v.color !== common) return false;
@@ -2135,12 +2193,15 @@ document.addEventListener('dblclick', function(event) {
       newPieces();
       S.newpieces();
     }
+    tickInkAndRepair(); // 잉크 만료 + 끄적이 수리 카운트다운
     if(checkModeWin()){
       return;
     }
     if(isGameOver()){
       endGame();
+      return;
     }
+    tickCharacters(); // 반짝이·끄적이 등장 스케줄
     checkAchievements();
     saveRun();
   }
@@ -2553,6 +2614,7 @@ document.addEventListener('dblclick', function(event) {
         Storage.data.stats.gamesPlayed++;
         Storage.data.savedRun = null;
         Storage.save();
+        hideChars();
         S.fanfare();
         vibrate([30,50,30,50,60]);
         showOverlay(
@@ -2605,49 +2667,49 @@ document.addEventListener('dblclick', function(event) {
     { par: 13, map: [   // 5. 단단한 돌
       "........","........","........","..###...",
       "........","........","........","........"]},
-    { par: 17, map: [   // 6. 십자가
+    { par: 16, map: [   // 6. 십자가
       "........","....o...","....o...",".oo#oo..",
       "....o...","....o...","........","........"]},
-    { par: 19, map: [   // 7. 요새 기둥
+    { par: 22, map: [   // 7. 요새 기둥
       "........","##....##","##....##","........",
       "........","##....##","##....##","........"]},
     { par: 20, map: [   // 8. 두 기둥
       "........",".o....o.",".o....o.",".#....#.",
       ".#....#.",".o....o.","........","........"]},
-    { par: 21, map: [   // 9. 샌드위치
+    { par: 24, map: [   // 9. 샌드위치
       "........",".oo##oo.","........","........",
       ".oo##oo.","........","........","........"]},
-    { par: 21, map: [   // 10. 금고
+    { par: 23, map: [   // 10. 금고
       "######..","#.......","#.......","#.......",
       "#.......","........","........","........"]},
-    { par: 21, map: [   // 11. 모래시계
+    { par: 23, map: [   // 11. 모래시계
       ".####...","..ooo...","...o....","...o....",
       "..ooo...",".####...","........","........"]},
-    { par: 21, map: [   // 12. 더블 프레임
+    { par: 22, map: [   // 12. 더블 프레임
       "##....##","##....##","........","........",
       "........","........","##....##","##....##"]},
-    { par: 22, map: [   // 13. 네 개의 창문
+    { par: 25, map: [   // 13. 네 개의 창문
       "........",".##..##.",".##..##.","........",
       "........",".oo..oo.","........","........"]},
-    { par: 23, map: [   // 14. 쌍둥이 벽돌
+    { par: 25, map: [   // 14. 쌍둥이 벽돌
       "........","..##....","..##....","........",
       "........","....##..","....##..","........"]},
-    { par: 27, map: [   // 15. H
+    { par: 31, map: [   // 15. H
       "........","..#..#..","..#..#..","..####..",
       "..#..#..","..#..#..","........","........"]},
-    { par: 28, map: [   // 16. 두꺼운 십자
+    { par: 31, map: [   // 16. 두꺼운 십자
       "........","...##...","...##...",".######.",
       "...##...","...##...","........","........"]},
-    { par: 28, map: [   // 17. 계단
+    { par: 31, map: [   // 17. 계단
       "........",".##.....",".###....","..###...",
       "...###..","....##..","........","........"]},
-    { par: 29, map: [   // 18. 천장
+    { par: 33, map: [   // 18. 천장
       ".######.","........","........","........",
       "........","........","........","........"]},
-    { par: 30, map: [   // 19. 바닥과 천장
+    { par: 34, map: [   // 19. 바닥과 천장
       "..####..","........","........","........",
       "........","........","........",".######."]},
-    { par: 32, map: [   // 20. 최후의 방
+    { par: 37, map: [   // 20. 최후의 방
       "..####..",".o....o.",".o....o.","........",
       "........",".o....o.",".o....o.","..####.."]},
   ];
@@ -2685,12 +2747,310 @@ document.addEventListener('dblclick', function(event) {
         else if(ch==="o") board[r][c]={stone:true, hp:1};
       }
     });
-    modeState = { stage:n, used:0, totalStones: countStones() };
+    modeState = { stage:n, used:0, totalStones: countStones(),
+                  helpIn:null, villIn:null, kkPending:null };
+    hideChars();
     renderBoard();
     newPieces(); // 돌이 깔린 보드 기준으로 배치 보장 재계산
     updateHud();
     renderObjective();
     saveRun();
+  }
+
+
+  /* ============================================================
+   *  CHARACTERS — 반짝이(조력자) & 끄적이(방해꾼)
+   *  설계 원칙: 예고 후 실행 · 대응 수단 존재 · 위기 상황 개입 금지
+   * ============================================================ */
+  const CHAR_SVG = {
+    // 반짝이: 주황 스파크 (손그림 느낌의 불규칙 광선)
+    b: '<svg viewBox="0 0 100 100">'
+      +'<g fill="#ff7a1a">'
+      +'<rect x="46" y="3"  width="8" height="32" rx="4" transform="rotate(0 50 50)"/>'
+      +'<rect x="46" y="8"  width="8" height="28" rx="4" transform="rotate(38 50 50)"/>'
+      +'<rect x="46" y="2"  width="8" height="34" rx="4" transform="rotate(82 50 50)"/>'
+      +'<rect x="46" y="9"  width="8" height="27" rx="4" transform="rotate(118 50 50)"/>'
+      +'<rect x="46" y="4"  width="8" height="31" rx="4" transform="rotate(158 50 50)"/>'
+      +'<rect x="46" y="7"  width="8" height="29" rx="4" transform="rotate(200 50 50)"/>'
+      +'<rect x="46" y="2"  width="8" height="33" rx="4" transform="rotate(242 50 50)"/>'
+      +'<rect x="46" y="9"  width="8" height="26" rx="4" transform="rotate(280 50 50)"/>'
+      +'<rect x="46" y="5"  width="8" height="30" rx="4" transform="rotate(320 50 50)"/>'
+      +'<circle cx="50" cy="50" r="21"/></g>'
+      +'<ellipse cx="43.5" cy="49" rx="5.5" ry="6.5" fill="#fff6d8"/>'
+      +'<ellipse cx="56.5" cy="49" rx="5.5" ry="6.5" fill="#fff6d8"/>'
+      +'<circle cx="44.5" cy="50.5" r="2.3" fill="#b1500a"/>'
+      +'<circle cx="57.5" cy="50.5" r="2.3" fill="#b1500a"/>'
+      +'</svg>',
+    // 끄적이: 까만 낙서 뭉치 (거친 타원 낙서 + 삐죽 가시)
+    k: '<svg viewBox="0 0 100 100">'
+      +'<g stroke="#15151d" stroke-linecap="round" fill="none">'
+      +'<line x1="50" y1="4"  x2="50" y2="26" stroke-width="5" transform="rotate(8 50 50)"/>'
+      +'<line x1="50" y1="9"  x2="50" y2="27" stroke-width="4.5" transform="rotate(52 50 50)"/>'
+      +'<line x1="50" y1="3"  x2="50" y2="25" stroke-width="5" transform="rotate(95 50 50)"/>'
+      +'<line x1="50" y1="10" x2="50" y2="28" stroke-width="4" transform="rotate(140 50 50)"/>'
+      +'<line x1="50" y1="5"  x2="50" y2="26" stroke-width="5" transform="rotate(185 50 50)"/>'
+      +'<line x1="50" y1="9"  x2="50" y2="27" stroke-width="4.5" transform="rotate(228 50 50)"/>'
+      +'<line x1="50" y1="4"  x2="50" y2="25" stroke-width="5" transform="rotate(272 50 50)"/>'
+      +'<line x1="50" y1="8"  x2="50" y2="28" stroke-width="4" transform="rotate(316 50 50)"/>'
+      +'</g>'
+      +'<circle cx="50" cy="52" r="22" fill="#15151d"/>'
+      +'<g stroke="#15151d" stroke-width="5" fill="none" stroke-linecap="round">'
+      +'<ellipse cx="50" cy="52" rx="26" ry="20" transform="rotate(-14 50 52)"/>'
+      +'<ellipse cx="49" cy="53" rx="24" ry="22" transform="rotate(22 49 53)"/>'
+      +'<ellipse cx="51" cy="51" rx="27" ry="18" transform="rotate(48 51 51)"/>'
+      +'</g>'
+      +'<ellipse cx="42.5" cy="48" rx="6" ry="4.5" fill="#fff" transform="rotate(-16 42.5 48)"/>'
+      +'<ellipse cx="58" cy="47" rx="6" ry="4.5" fill="#fff" transform="rotate(12 58 47)"/>'
+      +'<circle cx="43" cy="48.5" r="1.9" fill="#15151d"/>'
+      +'<circle cx="58.5" cy="47.5" r="1.9" fill="#15151d"/>'
+      +'</svg>'
+  };
+  const charEls = { b:null, k:null };
+
+  // 스테이지별 등장 파라미터 (배치 N회마다 행동)
+  function charParams(stage){
+    if(stage <= 5) return null;
+    if(stage <= 8)  return { help:9,  vill:0, ink:false };
+    if(stage <= 13) return { help:10, vill:9, ink:false };
+    if(stage <= 17) return { help:10, vill:7, ink:true };
+    return { help:11, vill:5, ink:true };
+  }
+  function evtJitter(n){ return Math.max(3, n + Math.floor(Math.random()*5) - 2); }
+
+  function charSpriteEl(type){
+    if(charEls[type]) return charEls[type];
+    const el=document.createElement("div");
+    el.className="charSprite";
+    el.innerHTML = CHAR_SVG[type] + '<div class="cbadge" style="display:none;"></div>';
+    document.body.appendChild(el);
+    charEls[type]=el;
+    return el;
+  }
+  function charFlyToRect(type, rect, badge){
+    const el=charSpriteEl(type);
+    const size=Math.max(46, rect.width*1.4);
+    el.style.width=size+"px"; el.style.height=size+"px";
+    const cs=getComputedStyle(el);
+    if(parseFloat(cs.opacity) < 0.5){
+      // 화면 밖에서 진입
+      el.style.transition="none";
+      el.style.left=(type==="k" ? window.innerWidth+50 : -size-50)+"px";
+      el.style.top=Math.max(40, rect.top-120)+"px";
+      void el.offsetWidth;
+      el.style.transition="";
+    }
+    el.style.opacity="1";
+    el.style.left=(rect.left+rect.width/2-size/2)+"px";
+    el.style.top=(rect.top+rect.height/2-size*0.74)+"px";
+    el.classList.add("bob");
+    const b=el.querySelector(".cbadge");
+    if(badge!=null){ b.style.display=""; b.textContent=badge; }
+    else b.style.display="none";
+  }
+  function charFlyToCell(type, r, c, badge){
+    charFlyToRect(type, cellEls[r][c].getBoundingClientRect(), badge);
+  }
+  function charLeave(type, scared){
+    const el=charEls[type];
+    if(!el) return;
+    el.classList.remove("bob");
+    if(scared) el.classList.add("scared");
+    setTimeout(()=>{
+      el.style.left=(type==="k" ? window.innerWidth+70 : -130)+"px";
+      el.style.top="-130px";
+      el.style.opacity="0";
+      el.classList.remove("scared");
+    }, scared?380:60);
+  }
+  function hideChars(){
+    ["b","k"].forEach(t=>{
+      const el=charEls[t];
+      if(el){ el.style.opacity="0"; el.classList.remove("bob","scared"); }
+    });
+  }
+  function charIntro(type){
+    const key="charIntro_"+type;
+    if(Storage.data[key]) return;
+    Storage.data[key]=true;
+    Storage.save();
+    if(type==="b") showToast("🧡","반짝이 등장!","가끔 날아와 돌에 금을 내거나 조각을 바꿔줘요.");
+    else showToast("🖤","끄적이 등장!","금 간 돌을 고치려 해요. 2번 배치하기 전에 그 돌을 부수세요!");
+  }
+
+  /* ----- 반짝이 행동: 변신 > 금내기 > 코인 ----- */
+  function helperAct(){
+    const deadIdx=pieces.findIndex(p=>p && !fitsAnyRotation(p));
+    if(deadIdx>=0 && trayEl.children[deadIdx]){
+      charFlyToRect("b", trayEl.children[deadIdx].getBoundingClientRect());
+      charIntro("b");
+      setTimeout(()=>{
+        const p=pieces[deadIdx];
+        if(p && !fitsAnyRotation(p)){
+          const f=forcePlaceablePiece();
+          if(f){
+            pieces[deadIdx]=f;
+            renderTray();
+            S.fanfare();
+            showToast("🧡","반짝이의 변신!","못 놓던 조각을 바꿔줬어요.");
+            saveRun();
+          }
+        }
+        charLeave("b");
+      }, 720);
+      return true;
+    }
+    const hard=[];
+    for(let r=0;r<SIZE;r++)for(let c=0;c<SIZE;c++){
+      const v=board[r][c];
+      if(v && v.stone && v.hp>=2) hard.push([r,c]);
+    }
+    if(hard.length){
+      const [r,c]=hard[Math.floor(Math.random()*hard.length)];
+      charFlyToCell("b", r, c);
+      charIntro("b");
+      setTimeout(()=>{
+        const v=board[r][c];
+        if(v && v.stone && v.hp>=2){
+          v.hp=1;
+          const cell=cellEls[r][c];
+          cell.classList.add("stonehit");
+          setTimeout(()=>cell.classList.remove("stonehit"),400);
+          spawnParticles([[r,c]]);
+          renderBoard();
+          S.booster();
+          vibrate(15);
+          showToast("🧡","반짝이가 금을 냈어요!","한 번만 더 깨면 돼요.");
+          saveRun();
+        }
+        charLeave("b");
+      }, 720);
+      return true;
+    }
+    // 줄 일도 없으면 코인 선물
+    charFlyToCell("b", 0, 2+Math.floor(Math.random()*4));
+    charIntro("b");
+    setTimeout(()=>{
+      Storage.data.coins += 5;
+      updateHud();
+      S.booster();
+      showToast("🧡","반짝이의 선물!","+5 🪙");
+      saveRun();
+      charLeave("b");
+    }, 650);
+    return true;
+  }
+
+  /* ----- 끄적이 행동: 돌 수리 예고 > 잉크 낙서 ----- */
+  function villainAct(params){
+    const cracked=[];
+    for(let r=0;r<SIZE;r++)for(let c=0;c<SIZE;c++){
+      const v=board[r][c];
+      if(v && v.stone && v.hp===1) cracked.push([r,c]);
+    }
+    if(cracked.length){
+      const [r,c]=cracked[Math.floor(Math.random()*cracked.length)];
+      modeState.kkPending={r,c,left:2};
+      charFlyToCell("k", r, c, 2);
+      charIntro("k");
+      S.invalid();
+      return true;
+    }
+    if(params.ink) return inkAct();
+    return false;
+  }
+  function inkAct(){
+    const empties=[];
+    for(let r=0;r<SIZE;r++)for(let c=0;c<SIZE;c++) if(!board[r][c]) empties.push([r,c]);
+    if(empties.length < 14) return false; // 보드가 빡빡하면 개입하지 않음
+    for(let t=0;t<12;t++){
+      const [r,c]=empties[Math.floor(Math.random()*empties.length)];
+      board[r][c]={ink:true,turns:4}; // 가배치 후 안전성 검사
+      const safe = pieces.some(p=>p && fitsAnyRotation(p));
+      board[r][c]=null;
+      if(!safe) continue;
+      charFlyToCell("k", r, c);
+      charIntro("k");
+      setTimeout(()=>{
+        if(!board[r][c]){
+          board[r][c]={ink:true,turns:3};
+          renderBoard();
+          S.invalid();
+          vibrate(15);
+          showToast("🖤","끄적이의 낙서!","3턴간 그 칸을 못 써요. 망치로 즉시 제거 가능!");
+          saveRun();
+        }
+        charLeave("k");
+      }, 720);
+      return true;
+    }
+    return false;
+  }
+
+  /* ----- 매 배치마다: 잉크 만료 + 수리 카운트다운 ----- */
+  function tickInkAndRepair(){
+    if(mode!=="adventure" || !modeState) return;
+    let changed=false;
+    for(let r=0;r<SIZE;r++)for(let c=0;c<SIZE;c++){
+      const v=board[r][c];
+      if(v && v.ink){
+        v.turns--;
+        changed=true;
+        if(v.turns<=0) board[r][c]=null;
+      }
+    }
+    const kp=modeState.kkPending;
+    if(kp){
+      const v=board[kp.r] && board[kp.r][kp.c];
+      if(!(v && v.stone && v.hp===1)){
+        // 끄적이가 노리던 돌을 부쉈다!
+        modeState.kkPending=null;
+        charLeave("k", true);
+        showToast("💨","끄적이가 도망갔어요!","수리를 막아냈어요.");
+      }else{
+        kp.left--;
+        const el=charEls.k;
+        if(el){ const b=el.querySelector(".cbadge"); if(b) b.textContent=kp.left; }
+        if(kp.left<=0){
+          v.hp=2;
+          modeState.kkPending=null;
+          changed=true;
+          const cell=cellEls[kp.r][kp.c];
+          cell.classList.add("stonehit");
+          setTimeout(()=>cell.classList.remove("stonehit"),400);
+          S.invalid();
+          vibrate([10,40,10]);
+          showToast("🖤","끄적이가 돌을 고쳤어요!","다시 두 번 깨야 해요.");
+          charLeave("k");
+        }
+      }
+    }
+    if(changed) renderBoard();
+  }
+
+  /* ----- 매 배치마다: 등장 스케줄 ----- */
+  function tickCharacters(){
+    if(mode!=="adventure" || gameOver || !modeState) return;
+    const params=charParams(modeState.stage);
+    if(!params) return;
+    if(modeState.helpIn==null) modeState.helpIn=evtJitter(params.help);
+    if(modeState.villIn==null) modeState.villIn=params.vill ? evtJitter(params.vill)+2 : 0;
+    if(params.help){
+      modeState.helpIn--;
+      if(modeState.helpIn<=0){
+        modeState.helpIn = helperAct() ? evtJitter(params.help) : 3;
+      }
+    }
+    if(params.vill && modeState.villIn>0){
+      modeState.villIn--;
+      if(modeState.villIn<=0){
+        // 안전장치: 보드 85%+ 또는 수리 진행 중이면 개입 연기
+        if(boardFillRatio()<0.85 && !modeState.kkPending && villainAct(params)){
+          modeState.villIn=evtJitter(params.vill);
+        }else{
+          modeState.villIn=2;
+        }
+      }
+    }
   }
 
   function renderStageSelect(){
@@ -2752,6 +3112,7 @@ document.addEventListener('dblclick', function(event) {
     Storage.data.stats.gamesPlayed++;
     if(mode === "adventure"){
       // 모험 실패: 점수 보상 없음, 재도전 유도
+      hideChars();
       if(MODES[mode].cleanup) MODES[mode].cleanup();
       showOverlay("스테이지 실패", "돌 "+countStones()+"개가 남았어요. 다시 도전!", "");
       checkAchievements();
@@ -2792,7 +3153,8 @@ document.addEventListener('dblclick', function(event) {
         mode, board, pieces, score, combo,
         modeState: {
           target: modeState.target, level: modeState.level,
-          stage: modeState.stage, used: modeState.used, totalStones: modeState.totalStones
+          stage: modeState.stage, used: modeState.used, totalStones: modeState.totalStones,
+          helpIn: modeState.helpIn, villIn: modeState.villIn, kkPending: modeState.kkPending
         }
       };
     }
@@ -2813,6 +3175,10 @@ document.addEventListener('dblclick', function(event) {
     modeNameEl.textContent = (mode==="adventure" && modeState.stage)
       ? ("모험 "+modeState.stage)
       : MODES[mode].name;
+    if(mode==="adventure" && modeState.kkPending){
+      const kp=modeState.kkPending;
+      setTimeout(()=>charFlyToCell("k", kp.r, kp.c, kp.left), 500);
+    }
     rng = (mode === "daily") ? makeSeededRng(dailySeed()) : Math.random;
     overlayEl.classList.remove("show");
     renderBoard();
@@ -2829,6 +3195,7 @@ document.addEventListener('dblclick', function(event) {
     board=Array.from({length:SIZE},()=>Array(SIZE).fill(null));
     score=0; combo=0; gameOver=false;
     displayScore=0;
+    hideChars();
     undoSnap=null;
     activeBooster=null;
     if(MODES[mode] && MODES[mode].cleanup) MODES[mode].cleanup();
