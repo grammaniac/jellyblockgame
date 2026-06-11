@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-<meta name="theme-color" content="#d4efff" />
+<meta name="theme-color" content="#d8c8d4" />
 <!-- iOS 홈 화면에서 실행 시 Safari UI 없이 독립 앱처럼 띄우기 위한 메타. -->
 <meta name="apple-mobile-web-app-capable" content="yes" />
 <meta name="mobile-web-app-capable" content="yes" />
@@ -25,18 +25,18 @@
     --wood-dark: rgba(255,255,255,.48);
     --wood: rgba(255,255,255,.66);
     --wood-light: rgba(255,255,255,.9);
-    --bg-grad-1:#d4efff;
-    --bg-grad-2:#ffdcef;
-    --text-main:#3c4a78;
-    --text-accent:#ff5fa2;
-    --text-sub:#7d8ab8;
-    --gold:#ffb03a;
+    --bg-grad-1:#d8c8d4;
+    --bg-grad-2:#f5ebee;
+    --text-main:#5a4658;
+    --text-accent:#c2557e;
+    --text-sub:#9b8a98;
+    --gold:#d9a94c;
     --board-grad-1: rgba(255,255,255,.55);
     --board-grad-2: rgba(255,255,255,.3);
     --slot-grad-1: rgba(255,255,255,.62);
     --slot-grad-2: rgba(255,255,255,.4);
-    --hole-grad-1: rgba(168,205,255,.42);
-    --hole-grad-2: rgba(199,173,255,.38);
+    --hole-grad-1: rgba(202,160,190,.4);
+    --hole-grad-2: rgba(178,142,178,.36);
     --frame-stripe: rgba(255,255,255,0);
     --frame-border: rgba(255,255,255,.95);
     --sparkle: rgba(255,255,255,.8);
@@ -51,15 +51,15 @@
   html,body{ height:100%; }
   /* standalone(홈 화면 앱)에서 홈 인디케이터 영역에 흰 줄이 비치지 않도록
      html에도 배경을 깐다. 테마 전환 시 JS(applyTheme)가 색을 갱신한다. */
-  html{ background:#e6ecff; }
+  html{ background:#ece2e8; }
   body{
     font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
     background-image:
       radial-gradient(circle, var(--sparkle) 0 1.3px, transparent 2.2px),
       radial-gradient(circle, var(--sparkle) 0 1px, transparent 1.8px),
-      radial-gradient(ellipse 60% 38% at 22% 8%, rgba(255,255,255,.9), transparent 70%),
-      radial-gradient(ellipse 55% 35% at 84% 92%, rgba(255,185,222,.5), transparent 70%),
-      linear-gradient(165deg, #cfeeff 0%, #e6ecff 48%, #ffd9ee 100%);
+      radial-gradient(ellipse 62% 40% at 24% 6%, rgba(255,250,245,.55), transparent 70%),
+      radial-gradient(ellipse 58% 36% at 82% 94%, rgba(232,180,200,.4), transparent 70%),
+      linear-gradient(168deg, #b9a7b6 0%, #d8c8d4 42%, #f5ebee 100%);
     background-size: 150px 170px, 95px 115px, 100% 100%, 100% 100%, 100% 100%;
     background-position: 12px 24px, 55px 80px, 0 0, 0 0, 0 0;
     color:var(--text-main);
@@ -84,7 +84,7 @@
   }
   .title{
     font-size:19px; font-weight:800; letter-spacing:.5px;
-    background:linear-gradient(95deg, #2fa8f0 0%, #b06ce8 50%, #ff5fa2 100%);
+    background:linear-gradient(95deg, #b08d3e 0%, #d9a94c 42%, #c96d96 100%);
     -webkit-background-clip:text; background-clip:text;
     color:transparent;
     filter:drop-shadow(0 1px 0 rgba(255,255,255,.9));
@@ -95,18 +95,18 @@
     width:36px; height:36px; border:none; border-radius:11px;
     background:linear-gradient(160deg,var(--wood-light),var(--wood-dark));
     color:var(--text-accent); font-size:16px; cursor:pointer;
-    box-shadow:0 3px 0 rgba(150,170,225,.55), inset 0 1px 1px rgba(255,255,255,.8);
+    box-shadow:0 3px 0 rgba(176,148,172,.55), inset 0 1px 1px rgba(255,255,255,.8);
     display:flex; align-items:center; justify-content:center;
     transition:transform .08s;
     flex-shrink:0;
   }
-  .iconbtn:active{ transform:translateY(2px); box-shadow:0 1px 0 rgba(150,170,225,.55); }
+  .iconbtn:active{ transform:translateY(2px); box-shadow:0 1px 0 rgba(176,148,172,.55); }
   .iconbtn.alert{
     animation: pulse 1.4s infinite;
   }
   @keyframes pulse{
-    0%,100%{ box-shadow:0 3px 0 rgba(150,170,225,.55), inset 0 1px 1px rgba(255,255,255,.25), 0 0 0 0 rgba(255,210,74,.7); }
-    50%{ box-shadow:0 3px 0 rgba(150,170,225,.55), inset 0 1px 1px rgba(255,255,255,.25), 0 0 0 6px rgba(255,210,74,0); }
+    0%,100%{ box-shadow:0 3px 0 rgba(176,148,172,.55), inset 0 1px 1px rgba(255,255,255,.25), 0 0 0 0 rgba(255,210,74,.7); }
+    50%{ box-shadow:0 3px 0 rgba(176,148,172,.55), inset 0 1px 1px rgba(255,255,255,.25), 0 0 0 6px rgba(255,210,74,0); }
   }
   .btnrow{ display:flex; gap:6px; }
 
@@ -131,7 +131,7 @@
   .scorecard{
     flex:1; background:linear-gradient(160deg,var(--wood),var(--wood-dark));
     border-radius:12px; padding:7px 10px;
-    box-shadow:inset 0 1px 2px rgba(255,255,255,.8), 0 3px 9px rgba(120,140,200,.3);
+    box-shadow:inset 0 1px 2px rgba(255,255,255,.8), 0 3px 9px rgba(152,122,150,.3);
     text-align:center;
   }
   .scorecard .lbl{ font-size:9px; letter-spacing:1.5px; color:var(--text-sub); font-weight:700; }
@@ -157,8 +157,8 @@
     border-radius:22px;
     box-shadow:
       inset 0 2px 3px rgba(255,255,255,.9),
-      inset 0 -4px 10px rgba(140,160,220,.18),
-      0 14px 34px rgba(120,140,200,.35);
+      inset 0 -4px 10px rgba(162,132,164,.18),
+      0 14px 34px rgba(152,122,150,.35);
     border:1.5px solid var(--frame-border);
     position:relative;
   }
@@ -177,7 +177,7 @@
     grid-template-rows:repeat(8,var(--cell));
     background: linear-gradient(160deg,var(--board-grad-1),var(--board-grad-2));
     border-radius:12px;
-    box-shadow:inset 0 3px 10px rgba(110,135,200,.28);
+    box-shadow:inset 0 3px 10px rgba(146,116,148,.28);
     touch-action: none;
   }
   .cell{ position:relative; width:var(--cell); height:var(--cell); }
@@ -185,7 +185,7 @@
     content:""; position:absolute; inset:7%;
     border-radius:22%;
     background:linear-gradient(160deg,var(--hole-grad-1),var(--hole-grad-2));
-    box-shadow:inset 0 2px 4px rgba(100,125,195,.32), inset 0 -2px 3px rgba(255,255,255,.5);
+    box-shadow:inset 0 2px 4px rgba(140,110,142,.32), inset 0 -2px 3px rgba(255,255,255,.5);
   }
   .cell.ghost::after{
     content:""; position:absolute; inset:4%;
@@ -283,7 +283,7 @@
     height:calc(var(--traycell) * 4.4);
     background:linear-gradient(160deg,var(--slot-grad-1),var(--slot-grad-2));
     border-radius:14px;
-    box-shadow:inset 0 2px 5px rgba(110,135,200,.25), 0 4px 10px rgba(120,140,200,.28);
+    box-shadow:inset 0 2px 5px rgba(146,116,148,.25), 0 4px 10px rgba(152,122,150,.28);
     display:flex; align-items:center; justify-content:center;
     position:relative;
   }
@@ -315,11 +315,11 @@
     display:flex; flex-direction:column; align-items:center; justify-content:center;
     cursor:pointer;
     position:relative;
-    box-shadow:0 2px 0 rgba(150,170,225,.5), inset 0 1px 1px rgba(255,255,255,.2);
+    box-shadow:0 2px 0 rgba(176,148,172,.5), inset 0 1px 1px rgba(255,255,255,.2);
     transition:transform .08s;
     font-size:11px; font-weight:800;
   }
-  .booster:active{ transform:translateY(2px); box-shadow:0 0 0 rgba(150,170,225,.5); }
+  .booster:active{ transform:translateY(2px); box-shadow:0 0 0 rgba(176,148,172,.5); }
   .booster .bicon{ font-size:18px; line-height:1; margin-bottom:1px; }
   .booster .bcount{
     position:absolute; top:-3px; right:-3px;
@@ -333,7 +333,7 @@
   .booster.active{
     background:linear-gradient(160deg, var(--gold), #c08020);
     color:#7a5210;
-    box-shadow:0 0 0 2px var(--gold), 0 2px 0 rgba(150,170,225,.5);
+    box-shadow:0 0 0 2px var(--gold), 0 2px 0 rgba(176,148,172,.5);
   }
   .booster:disabled{
     opacity:.4; cursor:default;
@@ -437,7 +437,7 @@
     border-radius:22px;
     padding:24px 26px;
     text-align:center;
-    box-shadow:0 18px 44px rgba(110,130,190,.45), inset 0 2px 3px rgba(255,255,255,.9);
+    box-shadow:0 18px 44px rgba(146,116,148,.45), inset 0 2px 3px rgba(255,255,255,.9);
     animation:popin .3s ease;
     max-width:340px;
     width:100%;
@@ -452,20 +452,20 @@
   .modal .best{ font-size:12px; color:#e0bd84; margin:8px 0 16px; }
   .bigbtn{
     border:none; cursor:pointer;
-    background:linear-gradient(160deg,var(--gold),#e09020);
+    background:linear-gradient(160deg,#e8c06a,var(--gold) 55%,#bd8d38);
     color:#7a5210; font-weight:800; font-size:16px;
     padding:11px 26px; border-radius:13px;
-    box-shadow:0 4px 0 #d4881a, inset 0 1px 1px rgba(255,255,255,.5);
+    box-shadow:0 4px 0 #a87f30, inset 0 1px 1px rgba(255,255,255,.5);
     transition:transform .08s;
     margin: 4px;
   }
-  .bigbtn:active{ transform:translateY(3px); box-shadow:0 1px 0 #d4881a; }
+  .bigbtn:active{ transform:translateY(3px); box-shadow:0 1px 0 #a87f30; }
   .bigbtn.secondary{
     background:linear-gradient(160deg,var(--wood-light),var(--wood-dark));
     color:var(--text-accent);
     box-shadow:0 4px 0 #7a5210, inset 0 1px 1px rgba(255,255,255,.2);
   }
-  .bigbtn.secondary:active{ box-shadow:0 1px 0 rgba(150,170,225,.55); }
+  .bigbtn.secondary:active{ box-shadow:0 1px 0 rgba(176,148,172,.55); }
 
   /* main menu */
   .menu-modes{
@@ -745,12 +745,46 @@
   .updatebar button:active{ transform:translateY(1px); }
 
   /* ---------- 모션 최소화 설정 존중 ---------- */
+  /* ---------- 스테이지 클리어: 3D 별 연출 ---------- */
+  #starBurst{
+    position:fixed; inset:0; z-index:400;
+    pointer-events:none; display:none;
+    perspective:700px;
+  }
+  #starBurst.show{ display:block; }
+  #starBurst .bstar{
+    position:absolute; top:20%; left:50%;
+    width:64px; height:64px; margin-left:-32px;
+    opacity:0;
+    filter:
+      drop-shadow(0 0 18px rgba(255,205,90,.9))
+      drop-shadow(0 8px 18px rgba(150,105,40,.45));
+    animation: starFly 1.15s cubic-bezier(.2,1.1,.32,1) forwards;
+  }
+  #starBurst .bstar svg{ width:100%; height:100%; display:block; overflow:visible; }
+  @keyframes starFly{
+    0%{   transform: translateX(var(--sx)) scale(.04) rotate(-50deg); opacity:0; }
+    16%{  opacity:1; }
+    58%{  transform: translateX(var(--sx)) scale(3.2) rotate(10deg); }
+    74%{  transform: translateX(var(--sx)) scale(2.25) rotate(-4deg); }
+    100%{ transform: translateX(var(--sx)) scale(2.5) rotate(0deg); opacity:1; }
+  }
+  #starBurst.fade .bstar{
+    transition: opacity .5s ease, transform .5s ease;
+    opacity:0 !important;
+    transform: translateX(var(--sx)) scale(1.3) !important;
+    animation:none;
+  }
+  @media (prefers-reduced-motion: reduce){
+    #starBurst .bstar{ animation:none; opacity:1; transform:translateX(var(--sx)) scale(2.2); }
+  }
+
   /* ---------- 캐릭터: 반짝이 & 끄적이 ---------- */
   .charSprite{
     position:fixed; z-index:150; pointer-events:none; opacity:0;
     transition: left .65s cubic-bezier(.45,.05,.35,1.18), top .65s cubic-bezier(.45,.05,.35,1.18),
                 opacity .35s ease, transform .3s cubic-bezier(.34,1.56,.64,1);
-    filter: drop-shadow(0 3px 6px rgba(120,140,200,.4));
+    filter: drop-shadow(0 3px 6px rgba(152,122,150,.4));
   }
   .charSprite.zoom{ transform: scale(1.45); }
   .charSprite .weye{ transform-box: fill-box; transform-origin: center; }
@@ -788,6 +822,33 @@
       radial-gradient(ellipse at 42% 38%, #34343f 0%, #17171f 65%);
     box-shadow: inset 0 -2px 5px rgba(0,0,0,.55), 0 1px 3px rgba(0,0,0,.3);
   }
+  /* ---------- 포도 보석 (3회 파괴) — 로즈 쿼츠 구슬 ---------- */
+  .blk.stone.grape{
+    inset:5%;
+    border-radius:50%;
+    background:
+      radial-gradient(circle at 32% 26%, rgba(255,255,255,.95) 0 7%, rgba(255,255,255,0) 24%),
+      radial-gradient(circle at 62% 78%, rgba(255,215,232,.55) 0 26%, transparent 58%),
+      radial-gradient(circle at 50% 42%, #f6d3e1 0%, #e0a8c4 55%, #b97e9f 100%);
+    box-shadow:
+      inset 0 -3px 7px rgba(150,85,118,.45),
+      inset 0 2px 3px rgba(255,255,255,.85),
+      0 2px 5px rgba(150,100,130,.4);
+  }
+  .blk.stone.grape::after{ display:none; } /* 보석엔 눈 없음 */
+  .blk.stone.grape.g2{
+    background:
+      url("data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%20100%20100'%3E%3Cg%20fill%3D'none'%20stroke-linecap%3D'round'%20stroke-linejoin%3D'round'%3E%3Cpath%20d%3D'M55%208%20L50%2018%20L57%2027%20L48%2037%20L53%2047'%20stroke%3D'rgba(70%2C20%2C45%2C0.5)'%20stroke-width%3D'3'%2F%3E%3Cpath%20d%3D'M50%2018%20L38%2023%20M48%2037%20L60%2042'%20stroke%3D'rgba(70%2C20%2C45%2C0.38)'%20stroke-width%3D'1.8'%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E") center / 100% 100% no-repeat,
+      radial-gradient(circle at 32% 26%, rgba(255,255,255,.9) 0 7%, rgba(255,255,255,0) 24%),
+      radial-gradient(circle at 50% 42%, #f0c5d7 0%, #d699b7 55%, #ad7392 100%);
+  }
+  .blk.stone.grape.g1{
+    background:
+      url("data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%20100%20100'%3E%3Cg%20fill%3D'none'%20stroke-linecap%3D'round'%20stroke-linejoin%3D'round'%3E%3Cpath%20d%3D'M56%200%20L52%207%20L57%2013%20L49%2020%20L55%2027%20L46%2034%20L53%2041%20L48%2049%20L54%2056%20L43%2063%20L50%2070%20L44%2078%20L49%2085%20L42%2092%20L46%20100'%20stroke%3D'rgba(0%2C0%2C0%2C0.6)'%20stroke-width%3D'3.2'%2F%3E%3Cpath%20d%3D'M52%207%20L40%2012%20L30%2010%20M49%2020%20L36%2026%20L24%2024%20M53%2041%20L66%2047%20L78%2044%20M54%2056%20L67%2063%20L76%2072%20M50%2070%20L36%2076%20L25%2074%20M49%2085%20L60%2091%20L68%2099'%20stroke%3D'rgba(0%2C0%2C0%2C0.45)'%20stroke-width%3D'1.9'%2F%3E%3Cpath%20d%3D'M40%2012%20L34%2019%20M36%2026%20L29%2033%20L20%2035%20M66%2047%20L72%2055%20M67%2063%20L62%2071%20M36%2076%20L31%2084%20M30%2010%20L21%206%20M78%2044%20L87%2038%20M25%2074%20L14%2079'%20stroke%3D'rgba(0%2C0%2C0%2C0.32)'%20stroke-width%3D'1.2'%2F%3E%3Cpath%20d%3D'M34%2019%20L37%2025%20M72%2055%20L80%2060%20M29%2033%20L33%2040%20M62%2071%20L67%2078%20M31%2084%20L36%2090%20M21%206%20L13%203%20M87%2038%20L94%2041'%20stroke%3D'rgba(0%2C0%2C0%2C0.22)'%20stroke-width%3D'0.8'%2F%3E%3Cpath%20d%3D'M58%201%20L54%208%20L59%2014%20M51%2022%20L57%2028%20M55%2043%20L50%2050'%20stroke%3D'rgba(255%2C255%2C255%2C0.14)'%20stroke-width%3D'1.2'%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E") center / 100% 100% no-repeat,
+      radial-gradient(circle at 32% 26%, rgba(255,255,255,.8) 0 6%, rgba(255,255,255,0) 22%),
+      radial-gradient(circle at 50% 42%, #e3b1c7 0%, #c386a5 55%, #9c6483 100%);
+  }
+
   .blk .inkno{
     position:absolute; right:7%; bottom:3%;
     font-size:10px; font-weight:900;
@@ -947,6 +1008,9 @@
       </div>
     </div>
   </div>
+
+  <!-- 스테이지 클리어 별 연출 레이어 -->
+  <div id="starBurst"></div>
 
   <!-- Launch chooser (앱 실행 시 선택) — stageOverlay보다 앞에 선언해야
        '모험 스테이지 선택'을 눌렀을 때 스테이지 화면이 위에 표시된다 -->
@@ -1551,7 +1615,7 @@ document.addEventListener('dblclick', function(event) {
         cell.classList.remove("ghost","gline","hint-glow");
         const v = board[r][c];
         const blk = cell.querySelector(".blk");
-        blk.classList.remove("rainbow","golden","stone","cracked","ink");
+        blk.classList.remove("rainbow","golden","stone","cracked","ink","grape","g2","g1");
         const oldNo = blk.querySelector(".inkno");
         if(oldNo && !(v && v.ink)) oldNo.remove();
         if(v){
@@ -1564,7 +1628,11 @@ document.addEventListener('dblclick', function(event) {
             no.textContent = v.turns;
           }else if(v.stone){
             blk.classList.add("stone");
-            if(v.hp <= 1) blk.classList.add("cracked");
+            if(v.grape){
+              blk.classList.add("grape");
+              if(v.hp === 2) blk.classList.add("g2");
+              else if(v.hp <= 1) blk.classList.add("g1");
+            }else if(v.hp <= 1) blk.classList.add("cracked");
             cell.style.setProperty("--c", "#74747e");
           }else if(v.special === SPECIAL_RAINBOW){
             blk.classList.add("rainbow");
@@ -2594,6 +2662,7 @@ document.addEventListener('dblclick', function(event) {
         );
         const nb = document.getElementById("nextStageBtn");
         nb.style.display = (st < STAGES.length) ? "" : "none";
+        setTimeout(()=>starBurst(stars), 280); // 별이 이마로 날아온다!
         return true;
       }
     },
@@ -2655,32 +2724,32 @@ document.addEventListener('dblclick', function(event) {
     { par: 23, map: [   // 11. 모래시계
       ".####...","..ooo...","...o....","...o....",
       "..ooo...",".####...","........","........"]},
-    { par: 22, map: [   // 12. 더블 프레임
-      "##....##","##....##","........","........",
-      "........","........","##....##","##....##"]},
+    { par: 28, map: [   // 12. 더블 프레임
+      "G#....#G","##....##","........","........",
+      "........","........","##....##","G#....#G"]},
     { par: 25, map: [   // 13. 네 개의 창문
       "........",".##..##.",".##..##.","........",
       "........",".oo..oo.","........","........"]},
     { par: 25, map: [   // 14. 쌍둥이 벽돌
       "........","..##....","..##....","........",
       "........","....##..","....##..","........"]},
-    { par: 31, map: [   // 15. H
-      "........","..#..#..","..#..#..","..####..",
+    { par: 32, map: [   // 15. H
+      "........","..#..#..","..#..#..","..#GG#..",
       "..#..#..","..#..#..","........","........"]},
     { par: 31, map: [   // 16. 두꺼운 십자
       "........","...##...","...##...",".######.",
       "...##...","...##...","........","........"]},
-    { par: 31, map: [   // 17. 계단
-      "........",".##.....",".###....","..###...",
-      "...###..","....##..","........","........"]},
+    { par: 34, map: [   // 17. 계단
+      "........",".##.....",".#G#....","..#G#...",
+      "...#G#..","....##..","........","........"]},
     { par: 33, map: [   // 18. 천장
       ".######.","........","........","........",
       "........","........","........","........"]},
-    { par: 34, map: [   // 19. 바닥과 천장
-      "..####..","........","........","........",
-      "........","........","........",".######."]},
-    { par: 37, map: [   // 20. 최후의 방
-      "..####..",".o....o.",".o....o.","........",
+    { par: 40, map: [   // 19. 바닥과 천장
+      "..#GG#..","........","........","........",
+      "........","........","........",".##GG##."]},
+    { par: 40, map: [   // 20. 최후의 방
+      "..G##G..",".o....o.",".o....o.","........",
       "........",".o....o.",".o....o.","..####.."]},
   ];
 
@@ -2715,11 +2784,17 @@ document.addEventListener('dblclick', function(event) {
         const ch=row[c];
         if(ch==="#") board[r][c]={stone:true, hp:2};
         else if(ch==="o") board[r][c]={stone:true, hp:1};
+        else if(ch==="G") board[r][c]={stone:true, grape:true, hp:3};
       }
     });
     modeState = { stage:n, used:0, totalStones: countStones(),
                   helpIn:null, villIn:null, kkPending:null };
     hideChars();
+    if(STAGES[n-1].map.some(row=>row.includes("G")) && !Storage.data.grapeIntro){
+      Storage.data.grapeIntro = true;
+      Storage.save();
+      setTimeout(()=>showToast("💎","포도 보석 등장!","단단한 보석이에요. 3번 깨야 부서져요."), 600);
+    }
     renderBoard();
     newPieces(); // 돌이 깔린 보드 기준으로 배치 보장 재계산
     updateHud();
@@ -2732,6 +2807,34 @@ document.addEventListener('dblclick', function(event) {
    *  CHARACTERS — 반짝이(조력자) & 끄적이(방해꾼)
    *  설계 원칙: 예고 후 실행 · 대응 수단 존재 · 위기 상황 개입 금지
    * ============================================================ */
+  // 스테이지 클리어: 별이 화면을 뚫고 나오는 3D 연출
+  const STAR_SVG = '<svg viewBox="0 0 100 100">'
+    +'<defs><linearGradient id="bsg" x1="0" y1="0" x2="0" y2="1">'
+    +'<stop offset="0" stop-color="#ffe9a3"/><stop offset=".55" stop-color="#f5c54a"/>'
+    +'<stop offset="1" stop-color="#d99a26"/></linearGradient></defs>'
+    +'<path d="M50 5 L61.5 37 L95 37 L67.5 57.5 L78 92 L50 70.5 L22 92 L32.5 57.5 L5 37 L38.5 37 Z"'
+    +' fill="url(#bsg)" stroke="#b8862a" stroke-width="3" stroke-linejoin="round"/>'
+    +'<ellipse cx="42" cy="34" rx="9" ry="5" fill="rgba(255,255,255,.55)" transform="rotate(-18 42 34)"/>'
+    +'</svg>';
+  function starBurst(n){
+    const layer=document.getElementById("starBurst");
+    layer.innerHTML="";
+    layer.classList.remove("fade");
+    layer.classList.add("show");
+    const xs = n===1 ? [0] : n===2 ? [-72,72] : [-98,0,98];
+    for(let i=0;i<n;i++){
+      const d=document.createElement("div");
+      d.className="bstar";
+      d.style.setProperty("--sx", xs[i]+"px");
+      d.style.animationDelay=(i*0.3)+"s";
+      d.innerHTML=STAR_SVG;
+      layer.appendChild(d);
+      setTimeout(()=>{ S.booster(); vibrate(12); }, 350+i*300);
+    }
+    setTimeout(()=>layer.classList.add("fade"), 2000+n*150);
+    setTimeout(()=>{ layer.classList.remove("show","fade"); layer.innerHTML=""; }, 2700+n*150);
+  }
+
   const CHAR_SVG = {
     // 반짝이: 주황 스파크 (손그림 느낌의 불규칙 광선)
     b: '<svg viewBox="0 0 100 100">'
@@ -2894,7 +2997,7 @@ document.addEventListener('dblclick', function(event) {
       setTimeout(()=>{
         const v=board[r][c];
         if(v && v.stone && v.hp>=2){
-          v.hp=1;
+          v.hp--;
           const cell=cellEls[r][c];
           cell.classList.add("stonehit");
           setTimeout(()=>cell.classList.remove("stonehit"),400);
@@ -3451,8 +3554,8 @@ document.addEventListener('dblclick', function(event) {
   function applyTheme(){
     // 단일 디자인 시스템: 시스템 UI 색만 고정 적용
     const metaTheme = document.querySelector('meta[name="theme-color"]');
-    if(metaTheme) metaTheme.setAttribute("content", "#d4efff");
-    document.documentElement.style.backgroundColor = "#e6ecff";
+    if(metaTheme) metaTheme.setAttribute("content", "#d8c8d4");
+    document.documentElement.style.backgroundColor = "#ece2e8";
   }
   function refreshSettingsUI(){
     document.getElementById("sfxToggle").classList.toggle("on", Storage.data.settings.sfx);
