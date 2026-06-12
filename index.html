@@ -800,6 +800,15 @@
     50%{ transform:translateY(-10%) rotate(4deg); }
   }
   .charSprite.scared svg{ animation: charScared .45s ease; }
+  /* 부글이의 비웃음: 화난 입 → 웃는 입 전환 */
+  .charSprite .mouthLaugh{ display:none; }
+  .charSprite.laughing .mouthAngry{ display:none; }
+  .charSprite.laughing .mouthLaugh{ display:block; }
+  .charSprite.laughing svg{ animation: bossLaugh .55s ease infinite; }
+  @keyframes bossLaugh{
+    0%,100%{ transform: rotate(-5deg) translateY(0); }
+    50%{ transform: rotate(5deg) translateY(-6%); }
+  }
   @keyframes charScared{
     0%{ transform:scale(1); }
     35%{ transform:scale(1.28) rotate(14deg); }
@@ -849,6 +858,42 @@
       radial-gradient(circle at 50% 42%, #e3b1c7 0%, #c386a5 55%, #9c6483 100%);
   }
 
+  /* ---------- 암조직 (4회 파괴) — 변이된 젤리 ---------- */
+  .blk.stone.cancer{
+    background:
+      radial-gradient(circle at 36% 30%, rgba(255,120,120,.5) 0 10%, rgba(255,120,120,0) 28%),
+      radial-gradient(ellipse at 50% 36%, #b03a4a 0%, #7e2433 55%, #4e1520 100%);
+    box-shadow:
+      inset 0 -0.22em 0.2em rgba(20,0,5,.5),
+      inset 0 0.12em 0.14em rgba(255,140,140,.35),
+      0 0.12em 0.2em rgba(80,20,30,.45);
+    animation: cancerPulse 1.7s ease-in-out infinite;
+  }
+  /* 변이된 눈: 빨갛게 굳은 분노 */
+  .blk.stone.cancer::after{
+    display:block;
+    content:""; position:absolute; inset:0;
+    border-radius:inherit;
+    background:
+      radial-gradient(circle at 36% 41%, #3d0a12 0 6.5%, rgba(0,0,0,0) 8%),
+      radial-gradient(circle at 64% 41%, #3d0a12 0 6.5%, rgba(0,0,0,0) 8%),
+      radial-gradient(circle at 35% 42%, #ffb8b8 0 12%, rgba(255,255,255,0) 13.5%),
+      radial-gradient(circle at 65% 42%, #ffb8b8 0 12%, rgba(255,255,255,0) 13.5%);
+  }
+  @keyframes cancerPulse{
+    0%,100%{ transform: scale(1); }
+    50%{ transform: scale(1.05); }
+  }
+  .blk .hpno{
+    position:absolute; right:5%; top:1%;
+    font-size:11px; font-weight:900;
+    color:#ffffff;
+    text-shadow:0 1px 2px rgba(40,0,8,.8);
+  }
+  @media (prefers-reduced-motion: reduce){
+    .blk.stone.cancer{ animation:none; }
+  }
+
   .blk .inkno{
     position:absolute; right:7%; bottom:3%;
     font-size:10px; font-weight:900;
@@ -895,6 +940,12 @@
   }
 
   /* ---------- 모험 모드: 스테이지 선택 ---------- */
+  .chapterlbl{
+    grid-column: 1 / -1;
+    font-size:12px; font-weight:900; letter-spacing:1px;
+    color:var(--text-accent);
+    padding:6px 0 0;
+  }
   .stage-grid{
     display:grid;
     grid-template-columns: repeat(4, 1fr);
@@ -1615,9 +1666,11 @@ document.addEventListener('dblclick', function(event) {
         cell.classList.remove("ghost","gline","hint-glow");
         const v = board[r][c];
         const blk = cell.querySelector(".blk");
-        blk.classList.remove("rainbow","golden","stone","cracked","ink","grape","g2","g1");
+        blk.classList.remove("rainbow","golden","stone","cracked","ink","grape","g2","g1","cancer");
         const oldNo = blk.querySelector(".inkno");
         if(oldNo && !(v && v.ink)) oldNo.remove();
+        const oldHp = blk.querySelector(".hpno");
+        if(oldHp && !(v && v.cancer)) oldHp.remove();
         if(v){
           cell.classList.add("filled");
           if(v.ink){
@@ -1628,7 +1681,13 @@ document.addEventListener('dblclick', function(event) {
             no.textContent = v.turns;
           }else if(v.stone){
             blk.classList.add("stone");
-            if(v.grape){
+            if(v.cancer){
+              blk.classList.add("cancer");
+              cell.style.setProperty("--c", "#8a2a38");
+              let hn = blk.querySelector(".hpno");
+              if(!hn){ hn=document.createElement("span"); hn.className="hpno"; blk.appendChild(hn); }
+              hn.textContent = v.hp;
+            }else if(v.grape){
               blk.classList.add("grape");
               if(v.hp === 2) blk.classList.add("g2");
               else if(v.hp <= 1) blk.classList.add("g1");
@@ -2297,7 +2356,7 @@ document.addEventListener('dblclick', function(event) {
   function spawnParticles(cells){
     cells.forEach(([r,c])=>{
       const v = board[r][c];
-      const color = v ? (v.stone ? "#a3a3ad" : (v.color || "#f7c63e")) : "#f7c63e";
+      const color = v ? (v.cancer ? "#c4475a" : v.stone ? "#a3a3ad" : (v.color || "#f7c63e")) : "#f7c63e";
       const rect=cellEls[r][c].getBoundingClientRect();
       const cx=rect.left+rect.width/2, cy=rect.top+rect.height/2;
       for(let i=0;i<3;i++){
@@ -2725,8 +2784,8 @@ document.addEventListener('dblclick', function(event) {
       ".####...","..ooo...","...o....","...o....",
       "..ooo...",".####...","........","........"]},
     { par: 28, map: [   // 12. 더블 프레임
-      "G#....#G","##....##","........","........",
-      "........","........","##....##","G#....#G"]},
+      "G#....#G","#......#","........","........",
+      "........","........","#......#","G#....#G"]},
     { par: 25, map: [   // 13. 네 개의 창문
       "........",".##..##.",".##..##.","........",
       "........",".oo..oo.","........","........"]},
@@ -2751,6 +2810,37 @@ document.addEventListener('dblclick', function(event) {
     { par: 40, map: [   // 20. 최후의 방
       "..G##G..",".o....o.",".o....o.","........",
       "........",".o....o.",".o....o.","..####.."]},
+    /* ----- 챕터 2: 부글이의 역습 (21~30) ----- */
+    { par: 24, map: [   // 21. 새로운 위협
+      "..G..G..","..#..#..","..#..#..","..o..o..",
+      "........","........","........","........"]},
+    { par: 34, map: [   // 22. 지그재그
+      ".##.....","...GG...",".....##.","........",
+      "........","........","........","........"]},
+    { par: 32, map: [   // 23. 포도밭
+      "........","..G.G...","...oo...","..G.G...",
+      "........","........","........","........"]},
+    { par: 19, map: [   // 24. 요새
+      "G##..##G","#......#","#......#","#......#",
+      "........","........","........","........"]},
+    { par: 44, map: [   // 25. 거울방
+      ".#.GG.#.","........","o......o","........",
+      "........",".#.GG.#.","........","........"]},
+    { par: 33, map: [   // 26. 사다리
+      ".#....#.",".#.oG.#.","........","........",
+      "........","........","........","........"]},
+    { par: 25, map: [   // 27. 보석 십자
+      "........","...##...","..#GG#..","...##...",
+      "........","........","........","........"]},
+    { par: 34, map: [   // 28. 겹겹이
+      "oo.oo.oo","........","..####..","........",
+      "...GG...","........","........","........"]},
+    { par: 43, map: [   // 29. 최후의 관문
+      ".#.##.#.","........","o.o..o.o","........",
+      "...GG...","........","........","........"]},
+    { par: 37, map: [   // 30. 부글이의 왕좌
+      "G#....#G","#......#","........","........",
+      "........","........","#......#","G#....#G"]},
   ];
 
   function countStones(){
@@ -2788,7 +2878,8 @@ document.addEventListener('dblclick', function(event) {
       }
     });
     modeState = { stage:n, used:0, totalStones: countStones(),
-                  helpIn:null, villIn:null, kkPending:null };
+                  helpIn:null, villIn:null, kkPending:null,
+                  bossIn:null, bossPending:null };
     hideChars();
     if(STAGES[n-1].map.some(row=>row.includes("G")) && !Storage.data.grapeIntro){
       Storage.data.grapeIntro = true;
@@ -2878,17 +2969,37 @@ document.addEventListener('dblclick', function(event) {
       +'<ellipse cx="58" cy="47" rx="6" ry="4.5" fill="#fff" transform="rotate(12 58 47)"/>'
       +'<circle cx="43" cy="48.5" r="1.9" fill="#15151d"/>'
       +'<circle cx="58.5" cy="47.5" r="1.9" fill="#15151d"/>'
+      +'</svg>',
+    // 부글이: 빨간 분노 블롭 (챕터 2 보스)
+    r: '<svg viewBox="0 0 100 100">'
+      +'<g fill="#d8333f">'
+      +'<path d="M50 6 L57 19 L70 12 L70 27 L84 26 L77 38 L91 44 L78 51 L86 63 L71 62 L73 77 L60 70 L55 84 L47 71 L36 80 L34 65 L20 68 L27 55 L13 50 L26 42 L17 30 L32 31 L31 17 L44 23 Z"/>'
+      +'</g>'
+      +'<circle cx="50" cy="48" r="24" fill="#c12733"/>'
+      +'<radialGradient id="bossg" cx=".4" cy=".3"><stop offset="0" stop-color="#ee5560"/><stop offset="1" stop-color="#9e1b27"/></radialGradient>'
+      +'<circle cx="50" cy="48" r="24" fill="url(#bossg)"/>'
+      +'<path d="M33 36 L45 42" stroke="#5e0e15" stroke-width="4.5" stroke-linecap="round"/>'
+      +'<path d="M67 36 L55 42" stroke="#5e0e15" stroke-width="4.5" stroke-linecap="round"/>'
+      +'<ellipse cx="42" cy="48" rx="5" ry="5.5" fill="#ffe1e1"/>'
+      +'<ellipse cx="58" cy="48" rx="5" ry="5.5" fill="#ffe1e1"/>'
+      +'<circle cx="42.5" cy="49" r="2.4" fill="#3d0a12"/>'
+      +'<circle cx="57.5" cy="49" r="2.4" fill="#3d0a12"/>'
+      +'<path class="mouthAngry" d="M40 62 L45 58 L50 62 L55 58 L60 62" stroke="#5e0e15" stroke-width="3.5" fill="none" stroke-linecap="round"/>'
+      +'<path class="mouthLaugh" d="M39 58 Q50 70 61 58 Z" fill="#5e0e15"/>'
       +'</svg>'
   };
-  const charEls = { b:null, k:null };
+  const charEls = { b:null, k:null, r:null };
 
   // 스테이지별 등장 파라미터 (배치 N회마다 행동)
   function charParams(stage){
     if(stage <= 5) return null;
-    if(stage <= 8)  return { help:9,  vill:0, ink:false };
-    if(stage <= 13) return { help:10, vill:9, ink:false };
-    if(stage <= 17) return { help:10, vill:7, ink:true };
-    return { help:11, vill:5, ink:true };
+    if(stage <= 8)  return { help:9,  vill:0, ink:false, boss:0 };
+    if(stage <= 13) return { help:10, vill:9, ink:false, boss:0 };
+    if(stage <= 17) return { help:10, vill:7, ink:true,  boss:0 };
+    if(stage <= 20) return { help:11, vill:5, ink:true,  boss:0 };
+    // 챕터 2: 부글이 등장 — 끄적이는 빈도를 낮춰 역할 교대
+    if(stage <= 25) return { help:11, vill:9, ink:true,  boss:12 };
+    return { help:12, vill:8, ink:true,  boss:9 };
   }
   function evtJitter(n){ return Math.max(3, n + Math.floor(Math.random()*5) - 2); }
 
@@ -2949,7 +3060,7 @@ document.addEventListener('dblclick', function(event) {
     }, 1050);
   }
   function hideChars(){
-    ["b","k"].forEach(t=>{
+    ["b","k","r"].forEach(t=>{
       const el=charEls[t];
       if(el){ el.style.opacity="0"; el.classList.remove("bob","scared"); }
     });
@@ -2960,7 +3071,8 @@ document.addEventListener('dblclick', function(event) {
     Storage.data[key]=true;
     Storage.save();
     if(type==="b") showToast("🧡","반짝이 등장!","가끔 날아와 돌에 금을 내거나 조각을 바꿔줘요.");
-    else showToast("🖤","끄적이 등장!","금 간 돌을 고치려 해요. 2번 배치하기 전에 그 돌을 부수세요!");
+    else if(type==="k") showToast("🖤","끄적이 등장!","금 간 돌을 고치려 해요. 2번 배치하기 전에 그 돌을 부수세요!");
+    else showToast("🔴","부글이 등장!!","앉은 젤리를 암조직으로 바꾸려 해요! 3번 배치 안에 그 젤리가 있는 줄을 지우세요!");
   }
 
   /* ----- 반짝이 행동: 변신 > 금내기 > 코인 ----- */
@@ -3072,6 +3184,35 @@ document.addEventListener('dblclick', function(event) {
     return false;
   }
 
+  /* ----- 부글이 행동: 일반 젤리에 앉아 암조직 변이 예고 ----- */
+  function bossAct(){
+    // 종반 보호: 남은 돌이 2개 이하면 다 이긴 판을 뒤집지 않는다
+    if(countStones() <= 2) return false;
+    const targets=[];
+    for(let r=0;r<SIZE;r++)for(let c=0;c<SIZE;c++){
+      const v=board[r][c];
+      if(v && !v.stone && !v.ink && !v.special) targets.push([r,c]);
+    }
+    if(targets.length < 4) return false; // 변이시킬 젤리가 너무 적으면 안 옴
+    const [r,c]=targets[Math.floor(Math.random()*targets.length)];
+    modeState.bossPending={r,c,left:3};
+    charFlyToCell("r", r, c, 3);
+    charIntro("r");
+    S.invalid();
+    vibrate([15,40,15]);
+    return true;
+  }
+  // 부글이의 비웃음: 확대 + 웃는 얼굴 + 퇴장
+  function charLaughOut(){
+    const el=charEls.r;
+    if(!el) return;
+    el.classList.add("zoom","laughing");
+    setTimeout(()=>{
+      el.classList.remove("zoom","laughing");
+      charLeave("r");
+    }, 1200);
+  }
+
   /* ----- 매 배치마다: 잉크 만료 + 수리 카운트다운 ----- */
   function tickInkAndRepair(){
     if(mode!=="adventure" || !modeState) return;
@@ -3110,6 +3251,43 @@ document.addEventListener('dblclick', function(event) {
         }
       }
     }
+    // 부글이 변이 카운트다운
+    const bp=modeState.bossPending;
+    if(bp){
+      const v=board[bp.r] && board[bp.r][bp.c];
+      if(!(v && !v.stone && !v.ink && !v.special)){
+        // 타깃 젤리가 사라졌다! 부글이 분해서 퇴장
+        modeState.bossPending=null;
+        charLeave("r", true);
+        showToast("💨","부글이가 물러갔어요!","변이를 막아냈어요.");
+      }else{
+        bp.left--;
+        const el=charEls.r;
+        if(el){ const b=el.querySelector(".cbadge"); if(b) b.textContent=bp.left; }
+        if(bp.left<=0){
+          // 변이 실행: 앉은 젤리 + 인접 젤리 1개 → 암조직 (점유 불변 = 즉사 위험 없음)
+          if(countStones() > 0){
+            board[bp.r][bp.c]={stone:true, cancer:true, hp:4};
+            const adj=[[bp.r-1,bp.c],[bp.r+1,bp.c],[bp.r,bp.c-1],[bp.r,bp.c+1]]
+              .filter(([rr,cc])=>rr>=0&&cc>=0&&rr<SIZE&&cc<SIZE)
+              .filter(([rr,cc])=>{ const w=board[rr][cc]; return w && !w.stone && !w.ink && !w.special; });
+            if(adj.length){
+              const [ar,ac]=adj[Math.floor(Math.random()*adj.length)];
+              board[ar][ac]={stone:true, cancer:true, hp:4};
+            }
+            changed=true;
+            S.gameover();
+            vibrate([20,60,20,60]);
+            showToast("🔴","부글이의 변이!","젤리가 암조직이 됐어요. 4번 깨야 해요. (망치=수술)");
+            updateHud();
+            charLaughOut();
+          }else{
+            charLeave("r", true); // 이미 클리어 직전이면 그냥 도망
+          }
+          modeState.bossPending=null;
+        }
+      }
+    }
     if(changed) renderBoard();
   }
 
@@ -3120,6 +3298,7 @@ document.addEventListener('dblclick', function(event) {
     if(!params) return;
     if(modeState.helpIn==null) modeState.helpIn=evtJitter(params.help);
     if(modeState.villIn==null) modeState.villIn=params.vill ? evtJitter(params.vill)+2 : 0;
+    if(modeState.bossIn==null) modeState.bossIn=params.boss ? evtJitter(params.boss)+4 : 0;
     if(params.help){
       modeState.helpIn--;
       if(modeState.helpIn<=0){
@@ -3129,11 +3308,22 @@ document.addEventListener('dblclick', function(event) {
     if(params.vill && modeState.villIn>0){
       modeState.villIn--;
       if(modeState.villIn<=0){
-        // 안전장치: 보드 85%+ 또는 수리 진행 중이면 개입 연기
-        if(boardFillRatio()<0.85 && !modeState.kkPending && villainAct(params)){
+        // 안전장치: 보드 85%+ 또는 다른 악역 활동 중이면 개입 연기
+        if(boardFillRatio()<0.85 && !modeState.kkPending && !modeState.bossPending && villainAct(params)){
           modeState.villIn=evtJitter(params.vill);
         }else{
           modeState.villIn=2;
+        }
+      }
+    }
+    if(params.boss && modeState.bossIn>0){
+      modeState.bossIn--;
+      if(modeState.bossIn<=0){
+        // 악역은 한 번에 하나만 활동
+        if(!modeState.kkPending && !modeState.bossPending && bossAct()){
+          modeState.bossIn=evtJitter(params.boss);
+        }else{
+          modeState.bossIn=3;
         }
       }
     }
@@ -3145,6 +3335,18 @@ document.addEventListener('dblclick', function(event) {
     const adv=Storage.data.adventure;
     STAGES.forEach((st,i)=>{
       const n=i+1;
+      if(n===1){
+        const lb=document.createElement("div");
+        lb.className="chapterlbl";
+        lb.textContent="챕터 1 · 젤리 왕국";
+        grid.appendChild(lb);
+      }
+      if(n===21){
+        const lb=document.createElement("div");
+        lb.className="chapterlbl";
+        lb.textContent="챕터 2 · 부글이의 역습 🔴";
+        grid.appendChild(lb);
+      }
       const locked = n > adv.unlocked;
       const stars = adv.stars[n]||0;
       const b=document.createElement("button");
@@ -3240,7 +3442,8 @@ document.addEventListener('dblclick', function(event) {
         modeState: {
           target: modeState.target, level: modeState.level,
           stage: modeState.stage, used: modeState.used, totalStones: modeState.totalStones,
-          helpIn: modeState.helpIn, villIn: modeState.villIn, kkPending: modeState.kkPending
+          helpIn: modeState.helpIn, villIn: modeState.villIn, kkPending: modeState.kkPending,
+          bossIn: modeState.bossIn, bossPending: modeState.bossPending
         }
       };
     }
@@ -3264,6 +3467,10 @@ document.addEventListener('dblclick', function(event) {
     if(mode==="adventure" && modeState.kkPending){
       const kp=modeState.kkPending;
       setTimeout(()=>charFlyToCell("k", kp.r, kp.c, kp.left), 500);
+    }
+    if(mode==="adventure" && modeState.bossPending){
+      const bp=modeState.bossPending;
+      setTimeout(()=>charFlyToCell("r", bp.r, bp.c, bp.left), 500);
     }
     rng = (mode === "daily") ? makeSeededRng(dailySeed()) : Math.random;
     overlayEl.classList.remove("show");
