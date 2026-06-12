@@ -800,14 +800,21 @@
     50%{ transform:translateY(-10%) rotate(4deg); }
   }
   .charSprite.scared svg{ animation: charScared .45s ease; }
-  /* 부글이의 비웃음: 화난 입 → 웃는 입 전환 */
-  .charSprite .mouthLaugh{ display:none; }
-  .charSprite.laughing .mouthAngry{ display:none; }
-  .charSprite.laughing .mouthLaugh{ display:block; }
-  .charSprite.laughing svg{ animation: bossLaugh .55s ease infinite; }
-  @keyframes bossLaugh{
-    0%,100%{ transform: rotate(-5deg) translateY(0); }
-    50%{ transform: rotate(5deg) translateY(-6%); }
+  /* 부글이의 썩소: 비대칭 입꼬리 + 한쪽 눈썹 + 반쯤 감은 눈, 거만한 고개 기울임 */
+  .charSprite .mouthLaugh,
+  .charSprite .browSmug,
+  .charSprite .lidSmug{ display:none; }
+  .charSprite.laughing .mouthAngry,
+  .charSprite.laughing .browAngry{ display:none; }
+  .charSprite.laughing .mouthLaugh,
+  .charSprite.laughing .browSmug,
+  .charSprite.laughing .lidSmug{ display:block; }
+  .charSprite.laughing svg{ animation: bossSmug 1.3s ease forwards; }
+  .charSprite.zoom.laughing{ transform: scale(1.7); }
+  @keyframes bossSmug{
+    0%{ transform: rotate(0deg); }
+    35%{ transform: rotate(-7deg) translateY(-4%); }
+    100%{ transform: rotate(9deg) translateY(-2%); }
   }
   @keyframes charScared{
     0%{ transform:scale(1); }
@@ -1463,9 +1470,22 @@ document.addEventListener('dblclick', function(event) {
       master.gain.value = 0.45;
       master.connect(actx.destination);
     }
-    if(actx.state==="suspended") actx.resume();
+    if(actx.state!=="running") actx.resume().catch(()=>{});
     return actx;
   }
+  // iOS: 다른 앱에 다녀오면 오디오 컨텍스트가 "interrupted"/"suspended"로
+  // 멈춘 채 깨어나지 않는다. 화면 복귀와 첫 터치 시점에 강제로 재개한다.
+  function resumeAudio(){
+    if(actx && actx.state!=="running"){
+      actx.resume().catch(()=>{});
+    }
+  }
+  document.addEventListener("visibilitychange", ()=>{
+    if(!document.hidden) setTimeout(resumeAudio, 120);
+  });
+  window.addEventListener("focus", resumeAudio);
+  window.addEventListener("pageshow", resumeAudio);
+  document.addEventListener("pointerdown", resumeAudio, true);
   function tone(freq,dur,type,vol,delay,glideTo){
     if(!Storage.data.settings.sfx) return;
     const a=audio(), t=a.currentTime+(delay||0);
@@ -2978,14 +2998,21 @@ document.addEventListener('dblclick', function(event) {
       +'<circle cx="50" cy="48" r="24" fill="#c12733"/>'
       +'<radialGradient id="bossg" cx=".4" cy=".3"><stop offset="0" stop-color="#ee5560"/><stop offset="1" stop-color="#9e1b27"/></radialGradient>'
       +'<circle cx="50" cy="48" r="24" fill="url(#bossg)"/>'
+      +'<g class="browAngry">'
       +'<path d="M33 36 L45 42" stroke="#5e0e15" stroke-width="4.5" stroke-linecap="round"/>'
       +'<path d="M67 36 L55 42" stroke="#5e0e15" stroke-width="4.5" stroke-linecap="round"/>'
+      +'</g>'
+      +'<g class="browSmug">'
+      +'<path d="M33 38 L45 41" stroke="#5e0e15" stroke-width="4.5" stroke-linecap="round"/>'
+      +'<path d="M55 36 Q62 30 68 33" stroke="#5e0e15" stroke-width="4.5" fill="none" stroke-linecap="round"/>'
+      +'</g>'
       +'<ellipse cx="42" cy="48" rx="5" ry="5.5" fill="#ffe1e1"/>'
       +'<ellipse cx="58" cy="48" rx="5" ry="5.5" fill="#ffe1e1"/>'
       +'<circle cx="42.5" cy="49" r="2.4" fill="#3d0a12"/>'
       +'<circle cx="57.5" cy="49" r="2.4" fill="#3d0a12"/>'
+      +'<path class="lidSmug" d="M36.5 45.5 Q42 43 47.5 46" stroke="#9e1b27" stroke-width="5" fill="none" stroke-linecap="round"/>'
       +'<path class="mouthAngry" d="M40 62 L45 58 L50 62 L55 58 L60 62" stroke="#5e0e15" stroke-width="3.5" fill="none" stroke-linecap="round"/>'
-      +'<path class="mouthLaugh" d="M39 58 Q50 70 61 58 Z" fill="#5e0e15"/>'
+      +'<path class="mouthLaugh" d="M37 63 Q48 65 58 59 Q61 57 63 53" stroke="#5e0e15" stroke-width="3.8" fill="none" stroke-linecap="round"/>'
       +'</svg>'
   };
   const charEls = { b:null, k:null, r:null };
@@ -3210,7 +3237,7 @@ document.addEventListener('dblclick', function(event) {
     setTimeout(()=>{
       el.classList.remove("zoom","laughing");
       charLeave("r");
-    }, 1200);
+    }, 1500);
   }
 
   /* ----- 매 배치마다: 잉크 만료 + 수리 카운트다운 ----- */
