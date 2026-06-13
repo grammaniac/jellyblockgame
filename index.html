@@ -810,6 +810,14 @@
   .charSprite.laughing .browSmug,
   .charSprite.laughing .lidSmug{ display:block; }
   .charSprite.laughing svg{ animation: bossSmug 1.3s ease forwards; }
+  /* 끄적이의 메롱: 확대 + 혀 내밀고 약올리기 */
+  .charSprite .tongue{ display:none; transform-box:fill-box; transform-origin:50% 8%; }
+  .charSprite.tease .tongue{ display:block; animation: tongueWag .45s ease-in-out infinite alternate; }
+  .charSprite.zoom.tease{ transform: scale(1.55); }
+  @keyframes tongueWag{
+    from{ transform: rotate(-8deg); }
+    to{ transform: rotate(8deg); }
+  }
   .charSprite.zoom.laughing{ transform: scale(1.7); }
   @keyframes bossSmug{
     0%{ transform: rotate(0deg); }
@@ -911,6 +919,7 @@
     .charSprite{ transition:none; }
     .charSprite.bob svg{ animation:none; }
     .charSprite.winking .weye{ animation:none; }
+    .charSprite.tease .tongue{ animation:none; }
     .frame.shake{ animation:none; }
     .particle{ display:none; }
     .blk.rainbow{ animation:none; }
@@ -1473,19 +1482,43 @@ document.addEventListener('dblclick', function(event) {
     if(actx.state!=="running") actx.resume().catch(()=>{});
     return actx;
   }
-  // iOS: 다른 앱에 다녀오면 오디오 컨텍스트가 "interrupted"/"suspended"로
-  // 멈춘 채 깨어나지 않는다. 화면 복귀와 첫 터치 시점에 강제로 재개한다.
+  // iOS: 앱 전환 후 오디오 컨텍스트가 멈추거나, 심하면 state는 "running"인데
+  // 실제로는 무음인 "좀비" 상태가 된다. 재개를 시도하고, 250ms 뒤에도
+  // 시간이 흐르지 않으면 컨텍스트를 부수고 새로 만든다.
   function resumeAudio(){
     if(actx && actx.state!=="running"){
       actx.resume().catch(()=>{});
     }
   }
+  function rebuildAudio(){
+    try{ if(actx) actx.close(); }catch(e){}
+    actx = null; master = null;
+    const wasBgm = bgmStarted;
+    if(wasBgm) stopBGM();
+    audio();
+    if(wasBgm) startBGM();
+  }
+  let audioCheckAt = 0;
+  function ensureAudioAlive(){
+    if(!actx) return; // 아직 소리 쓴 적 없음 — 다음 소리에서 새로 생성됨
+    const now = Date.now();
+    if(now - audioCheckAt < 1500) return;
+    audioCheckAt = now;
+    const t0 = actx.currentTime;
+    actx.resume().catch(()=>{});
+    setTimeout(()=>{
+      if(!actx) return;
+      if(actx.state!=="running" || actx.currentTime===t0){
+        rebuildAudio();
+      }
+    }, 250);
+  }
   document.addEventListener("visibilitychange", ()=>{
-    if(!document.hidden) setTimeout(resumeAudio, 120);
+    if(!document.hidden) setTimeout(ensureAudioAlive, 120);
   });
-  window.addEventListener("focus", resumeAudio);
-  window.addEventListener("pageshow", resumeAudio);
-  document.addEventListener("pointerdown", resumeAudio, true);
+  window.addEventListener("focus", ensureAudioAlive);
+  window.addEventListener("pageshow", ensureAudioAlive);
+  document.addEventListener("pointerdown", ()=>{ resumeAudio(); ensureAudioAlive(); }, true);
   function tone(freq,dur,type,vol,delay,glideTo){
     if(!Storage.data.settings.sfx) return;
     const a=audio(), t=a.currentTime+(delay||0);
@@ -2989,6 +3022,10 @@ document.addEventListener('dblclick', function(event) {
       +'<ellipse cx="58" cy="47" rx="6" ry="4.5" fill="#fff" transform="rotate(12 58 47)"/>'
       +'<circle cx="43" cy="48.5" r="1.9" fill="#15151d"/>'
       +'<circle cx="58.5" cy="47.5" r="1.9" fill="#15151d"/>'
+      +'<g class="tongue">'
+      +'<path d="M43 58 Q50 61 57 58 L56 67 Q50 75 44 67 Z" fill="#ff8fb0" stroke="#c2486f" stroke-width="2" stroke-linejoin="round"/>'
+      +'<path d="M50 61 L50 70" stroke="#c2486f" stroke-width="1.8" stroke-linecap="round"/>'
+      +'</g>'
       +'</svg>',
     // 부글이: 빨간 분노 블롭 (챕터 2 보스)
     r: '<svg viewBox="0 0 100 100">'
@@ -3204,7 +3241,7 @@ document.addEventListener('dblclick', function(event) {
           showToast("🖤","끄적이의 낙서!","3턴간 그 칸을 못 써요. 망치로 즉시 제거 가능!");
           saveRun();
         }
-        charLeave("k");
+        charTeaseOut();
       }, 720);
       return true;
     }
@@ -3228,6 +3265,16 @@ document.addEventListener('dblclick', function(event) {
     S.invalid();
     vibrate([15,40,15]);
     return true;
+  }
+  // 끄적이의 메롱: 확대 → 혀 내밀고 약올리며 퇴장
+  function charTeaseOut(){
+    const el=charEls.k;
+    if(!el){ charLeave("k"); return; }
+    el.classList.add("zoom","tease");
+    setTimeout(()=>{
+      el.classList.remove("zoom","tease");
+      charLeave("k");
+    }, 1300);
   }
   // 부글이의 비웃음: 확대 + 웃는 얼굴 + 퇴장
   function charLaughOut(){
@@ -3274,7 +3321,7 @@ document.addEventListener('dblclick', function(event) {
           S.invalid();
           vibrate([10,40,10]);
           showToast("🖤","끄적이가 돌을 고쳤어요!","다시 두 번 깨야 해요.");
-          charLeave("k");
+          charTeaseOut();
         }
       }
     }
