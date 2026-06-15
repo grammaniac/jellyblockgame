@@ -800,29 +800,14 @@
     50%{ transform:translateY(-10%) rotate(4deg); }
   }
   .charSprite.scared svg{ animation: charScared .45s ease; }
-  /* 부글이의 썩소: 비대칭 입꼬리 + 한쪽 눈썹 + 반쯤 감은 눈, 거만한 고개 기울임 */
-  .charSprite .mouthLaugh,
-  .charSprite .browSmug,
-  .charSprite .lidSmug{ display:none; }
-  .charSprite.laughing .mouthAngry,
-  .charSprite.laughing .browAngry{ display:none; }
-  .charSprite.laughing .mouthLaugh,
-  .charSprite.laughing .browSmug,
-  .charSprite.laughing .lidSmug{ display:block; }
-  .charSprite.laughing svg{ animation: bossSmug 1.3s ease forwards; }
-  /* 끄적이의 메롱: 확대 + 혀 내밀고 약올리기 */
-  .charSprite .tongue{ display:none; transform-box:fill-box; transform-origin:50% 8%; }
-  .charSprite.tease .tongue{ display:block; animation: tongueWag .45s ease-in-out infinite alternate; }
-  .charSprite.zoom.tease{ transform: scale(1.55); }
-  @keyframes tongueWag{
-    from{ transform: rotate(-8deg); }
-    to{ transform: rotate(8deg); }
-  }
-  .charSprite.zoom.laughing{ transform: scale(1.7); }
-  @keyframes bossSmug{
-    0%{ transform: rotate(0deg); }
-    35%{ transform: rotate(-7deg) translateY(-4%); }
-    100%{ transform: rotate(9deg) translateY(-2%); }
+  /* 부글이의 비웃음: 화난 입 → 웃는 입 전환 */
+  .charSprite .mouthLaugh{ display:none; }
+  .charSprite.laughing .mouthAngry{ display:none; }
+  .charSprite.laughing .mouthLaugh{ display:block; }
+  .charSprite.laughing svg{ animation: bossLaugh .55s ease infinite; }
+  @keyframes bossLaugh{
+    0%,100%{ transform: rotate(-5deg) translateY(0); }
+    50%{ transform: rotate(5deg) translateY(-6%); }
   }
   @keyframes charScared{
     0%{ transform:scale(1); }
@@ -919,7 +904,6 @@
     .charSprite{ transition:none; }
     .charSprite.bob svg{ animation:none; }
     .charSprite.winking .weye{ animation:none; }
-    .charSprite.tease .tongue{ animation:none; }
     .frame.shake{ animation:none; }
     .particle{ display:none; }
     .blk.rainbow{ animation:none; }
@@ -1479,46 +1463,36 @@ document.addEventListener('dblclick', function(event) {
       master.gain.value = 0.45;
       master.connect(actx.destination);
     }
-    if(actx.state!=="running") actx.resume().catch(()=>{});
+    if(actx.state==="suspended") actx.resume();
     return actx;
   }
-  // iOS: 앱 전환 후 오디오 컨텍스트가 멈추거나, 심하면 state는 "running"인데
-  // 실제로는 무음인 "좀비" 상태가 된다. 재개를 시도하고, 250ms 뒤에도
-  // 시간이 흐르지 않으면 컨텍스트를 부수고 새로 만든다.
-  function resumeAudio(){
-    if(actx && actx.state!=="running"){
-      actx.resume().catch(()=>{});
-    }
-  }
+
+  /* iOS '좀비 AudioContext' 대응
+   * 다른 앱에 다녀오면 actx.state는 "running"인데 실제로는 무음이 되는 iOS 버그.
+   * → 복귀 시 currentTime이 멈췄는지 검사하고(ensureAudioAlive),
+   *   멈췄으면 컨텍스트를 통째로 재생성한다(rebuildAudio).
+   * 효과음은 매번 audio()로 컨텍스트를 새로 받으므로 재생성에 안전하지만,
+   * BGM의 bgmGain만 구 컨텍스트에 묶이므로 재생성 시 반드시 stopBGM → startBGM. */
   function rebuildAudio(){
-    try{ if(actx) actx.close(); }catch(e){}
+    const wasBgmOn = bgmStarted && Storage.data.settings.bgm;
+    try{ stopBGM(); }catch(e){}
+    if(actx){ try{ actx.close(); }catch(e){} }
     actx = null; master = null;
-    const wasBgm = bgmStarted;
-    if(wasBgm) stopBGM();
-    audio();
-    if(wasBgm) startBGM();
+    audio();  // 새 컨텍스트 + master 재생성
+    if(wasBgmOn) startBGM();
   }
-  let audioCheckAt = 0;
   function ensureAudioAlive(){
-    if(!actx) return; // 아직 소리 쓴 적 없음 — 다음 소리에서 새로 생성됨
-    const now = Date.now();
-    if(now - audioCheckAt < 1500) return;
-    audioCheckAt = now;
+    if(!actx) return;                       // 아직 한 번도 안 깬 컨텍스트는 그냥 둔다
+    if(actx.state==="suspended"){ try{ actx.resume(); }catch(e){} }
+    // currentTime이 두 번 읽어도 그대로면(=시계가 멈춤) 좀비로 판정 → 재생성
     const t0 = actx.currentTime;
-    actx.resume().catch(()=>{});
     setTimeout(()=>{
       if(!actx) return;
-      if(actx.state!=="running" || actx.currentTime===t0){
-        rebuildAudio();
-      }
-    }, 250);
+      const stalled = (actx.currentTime === t0) && (actx.state === "running");
+      if(stalled) rebuildAudio();
+    }, 120);
   }
-  document.addEventListener("visibilitychange", ()=>{
-    if(!document.hidden) setTimeout(ensureAudioAlive, 120);
-  });
-  window.addEventListener("focus", ensureAudioAlive);
-  window.addEventListener("pageshow", ensureAudioAlive);
-  document.addEventListener("pointerdown", ()=>{ resumeAudio(); ensureAudioAlive(); }, true);
+
   function tone(freq,dur,type,vol,delay,glideTo){
     if(!Storage.data.settings.sfx) return;
     const a=audio(), t=a.currentTime+(delay||0);
@@ -3022,10 +2996,6 @@ document.addEventListener('dblclick', function(event) {
       +'<ellipse cx="58" cy="47" rx="6" ry="4.5" fill="#fff" transform="rotate(12 58 47)"/>'
       +'<circle cx="43" cy="48.5" r="1.9" fill="#15151d"/>'
       +'<circle cx="58.5" cy="47.5" r="1.9" fill="#15151d"/>'
-      +'<g class="tongue">'
-      +'<path d="M43 58 Q50 61 57 58 L56 67 Q50 75 44 67 Z" fill="#ff8fb0" stroke="#c2486f" stroke-width="2" stroke-linejoin="round"/>'
-      +'<path d="M50 61 L50 70" stroke="#c2486f" stroke-width="1.8" stroke-linecap="round"/>'
-      +'</g>'
       +'</svg>',
     // 부글이: 빨간 분노 블롭 (챕터 2 보스)
     r: '<svg viewBox="0 0 100 100">'
@@ -3035,21 +3005,14 @@ document.addEventListener('dblclick', function(event) {
       +'<circle cx="50" cy="48" r="24" fill="#c12733"/>'
       +'<radialGradient id="bossg" cx=".4" cy=".3"><stop offset="0" stop-color="#ee5560"/><stop offset="1" stop-color="#9e1b27"/></radialGradient>'
       +'<circle cx="50" cy="48" r="24" fill="url(#bossg)"/>'
-      +'<g class="browAngry">'
       +'<path d="M33 36 L45 42" stroke="#5e0e15" stroke-width="4.5" stroke-linecap="round"/>'
       +'<path d="M67 36 L55 42" stroke="#5e0e15" stroke-width="4.5" stroke-linecap="round"/>'
-      +'</g>'
-      +'<g class="browSmug">'
-      +'<path d="M33 38 L45 41" stroke="#5e0e15" stroke-width="4.5" stroke-linecap="round"/>'
-      +'<path d="M55 36 Q62 30 68 33" stroke="#5e0e15" stroke-width="4.5" fill="none" stroke-linecap="round"/>'
-      +'</g>'
       +'<ellipse cx="42" cy="48" rx="5" ry="5.5" fill="#ffe1e1"/>'
       +'<ellipse cx="58" cy="48" rx="5" ry="5.5" fill="#ffe1e1"/>'
       +'<circle cx="42.5" cy="49" r="2.4" fill="#3d0a12"/>'
       +'<circle cx="57.5" cy="49" r="2.4" fill="#3d0a12"/>'
-      +'<path class="lidSmug" d="M36.5 45.5 Q42 43 47.5 46" stroke="#9e1b27" stroke-width="5" fill="none" stroke-linecap="round"/>'
       +'<path class="mouthAngry" d="M40 62 L45 58 L50 62 L55 58 L60 62" stroke="#5e0e15" stroke-width="3.5" fill="none" stroke-linecap="round"/>'
-      +'<path class="mouthLaugh" d="M37 63 Q48 65 58 59 Q61 57 63 53" stroke="#5e0e15" stroke-width="3.8" fill="none" stroke-linecap="round"/>'
+      +'<path class="mouthLaugh" d="M39 58 Q50 70 61 58 Z" fill="#5e0e15"/>'
       +'</svg>'
   };
   const charEls = { b:null, k:null, r:null };
@@ -3241,7 +3204,7 @@ document.addEventListener('dblclick', function(event) {
           showToast("🖤","끄적이의 낙서!","3턴간 그 칸을 못 써요. 망치로 즉시 제거 가능!");
           saveRun();
         }
-        charTeaseOut();
+        charLeave("k");
       }, 720);
       return true;
     }
@@ -3266,16 +3229,6 @@ document.addEventListener('dblclick', function(event) {
     vibrate([15,40,15]);
     return true;
   }
-  // 끄적이의 메롱: 확대 → 혀 내밀고 약올리며 퇴장
-  function charTeaseOut(){
-    const el=charEls.k;
-    if(!el){ charLeave("k"); return; }
-    el.classList.add("zoom","tease");
-    setTimeout(()=>{
-      el.classList.remove("zoom","tease");
-      charLeave("k");
-    }, 1300);
-  }
   // 부글이의 비웃음: 확대 + 웃는 얼굴 + 퇴장
   function charLaughOut(){
     const el=charEls.r;
@@ -3284,7 +3237,7 @@ document.addEventListener('dblclick', function(event) {
     setTimeout(()=>{
       el.classList.remove("zoom","laughing");
       charLeave("r");
-    }, 1500);
+    }, 1200);
   }
 
   /* ----- 매 배치마다: 잉크 만료 + 수리 카운트다운 ----- */
@@ -3321,7 +3274,7 @@ document.addEventListener('dblclick', function(event) {
           S.invalid();
           vibrate([10,40,10]);
           showToast("🖤","끄적이가 돌을 고쳤어요!","다시 두 번 깨야 해요.");
-          charTeaseOut();
+          charLeave("k");
         }
       }
     }
@@ -4088,6 +4041,8 @@ document.addEventListener('dblclick', function(event) {
   // iOS: 오디오는 사용자 제스처 안에서 생성/resume 해야 소리가 난다.
   // 첫 터치 한 번으로 AudioContext를 미리 깨워둔다.
   window.addEventListener("pointerdown", ()=>{ try{ audio(); }catch(e){} }, { once:true, passive:true });
+  // 이후의 터치마다 좀비 컨텍스트인지 가볍게 점검 (복귀 직후 첫 입력에서 무음 방지)
+  window.addEventListener("pointerdown", ()=>{ try{ ensureAudioAlive(); }catch(e){} }, { passive:true });
 
   let bgmWasOn = false;
   document.addEventListener("visibilitychange",()=>{
@@ -4098,10 +4053,15 @@ document.addEventListener('dblclick', function(event) {
       if(bgmStarted) stopBGM();
       if(actx && actx.state==="running"){ try{ actx.suspend(); }catch(e){} }
     }else{
+      // 복귀: resume 시도 후 좀비 검사. 무음이면 ensureAudioAlive가 컨텍스트를 재생성한다.
       if(actx && actx.state==="suspended"){ try{ actx.resume(); }catch(e){} }
       if(bgmWasOn && Storage.data.settings.bgm) startBGM();
+      ensureAudioAlive();
     }
   });
+  // 복귀 경로가 visibilitychange 하나로는 부족한 iOS를 위해 다중 이벤트에서도 점검.
+  window.addEventListener("focus", ()=>{ try{ ensureAudioAlive(); }catch(e){} });
+  window.addEventListener("pageshow", ()=>{ try{ ensureAudioAlive(); }catch(e){} });
 
   /* ============================================================
    *  PWA — 서비스 워커 등록 + 업데이트 알림
