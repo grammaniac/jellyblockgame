@@ -809,6 +809,14 @@
     0%,100%{ transform: rotate(-5deg) translateY(0); }
     50%{ transform: rotate(5deg) translateY(-6%); }
   }
+  /* 끄적이의 약올림(메롱): 1.55배 확대 + 분홍 혀를 내밀고 좌우로 흔든다 */
+  .charSprite .tongue{ display:none; }
+  .charSprite.teasing{ transform: scale(1.55); }
+  .charSprite.teasing .tongue{ display:block; transform-box: fill-box; transform-origin: top center; animation: teaseWag .38s ease-in-out infinite; }
+  @keyframes teaseWag{
+    0%,100%{ transform: rotate(-9deg); }
+    50%{ transform: rotate(9deg); }
+  }
   @keyframes charScared{
     0%{ transform:scale(1); }
     35%{ transform:scale(1.28) rotate(14deg); }
@@ -904,6 +912,8 @@
     .charSprite{ transition:none; }
     .charSprite.bob svg{ animation:none; }
     .charSprite.winking .weye{ animation:none; }
+    .charSprite.teasing .tongue{ animation:none; }
+    .charSprite.laughing svg{ animation:none; }
     .frame.shake{ animation:none; }
     .particle{ display:none; }
     .blk.rainbow{ animation:none; }
@@ -2996,6 +3006,13 @@ document.addEventListener('dblclick', function(event) {
       +'<ellipse cx="58" cy="47" rx="6" ry="4.5" fill="#fff" transform="rotate(12 58 47)"/>'
       +'<circle cx="43" cy="48.5" r="1.9" fill="#15151d"/>'
       +'<circle cx="58.5" cy="47.5" r="1.9" fill="#15151d"/>'
+      // 메롱: 평소엔 숨김. teasing 클래스가 붙으면 혀가 입에서 나와 좌우로 흔들린다.
+      // 어두운 입(구멍) 안에서 아래로 길게 늘어진, 끝이 둥글고 중앙에 홈이 있는 혀 모양.
+      +'<g class="tongue">'
+      +'<path d="M40 60 Q50 67 60 60 Z" fill="#2a0d12"/>'  // 입(구멍): 혀가 나오는 어두운 배경
+      +'<path d="M44 61 Q44 76 50 78 Q56 76 56 61 Z" fill="#f2879f"/>'  // 혀 본체 (아래로 늘어짐, 끝 둥금)
+      +'<path d="M50 63 L50 74" stroke="#d2667e" stroke-width="1.6" stroke-linecap="round"/>'  // 중앙 세로 홈
+      +'</g>'
       +'</svg>',
     // 부글이: 빨간 분노 블롭 (챕터 2 보스)
     r: '<svg viewBox="0 0 100 100">'
@@ -3085,6 +3102,17 @@ document.addEventListener('dblclick', function(event) {
       el.classList.remove("zoom","winking");
       charLeave(type);
     }, 1050);
+  }
+  // 끄적이의 약올림: 1.55배 확대 + 혀 내밀고 좌우로 흔들며 메롱 → 퇴장
+  // (teasing 클래스가 확대와 혀 표시를 동시에 처리한다)
+  function charTeaseOut(){
+    const el=charEls.k;
+    if(!el){ return; }
+    el.classList.add("teasing");
+    setTimeout(()=>{
+      el.classList.remove("teasing");
+      charLeave("k");
+    }, 1200);
   }
   function hideChars(){
     ["b","k","r"].forEach(t=>{
@@ -3204,7 +3232,7 @@ document.addEventListener('dblclick', function(event) {
           showToast("🖤","끄적이의 낙서!","3턴간 그 칸을 못 써요. 망치로 즉시 제거 가능!");
           saveRun();
         }
-        charLeave("k");
+        charTeaseOut();
       }, 720);
       return true;
     }
@@ -3274,7 +3302,7 @@ document.addEventListener('dblclick', function(event) {
           S.invalid();
           vibrate([10,40,10]);
           showToast("🖤","끄적이가 돌을 고쳤어요!","다시 두 번 깨야 해요.");
-          charLeave("k");
+          charTeaseOut();
         }
       }
     }

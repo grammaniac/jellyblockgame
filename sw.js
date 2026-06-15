@@ -1,11 +1,11 @@
-/* 우드 블록 퀘스트 — Service Worker
+/* 젤리 블록 퀘스트 — Service Worker
  * 전략:
  *  - 설치 시 핵심 자산을 프리캐시 → 완전 오프라인 플레이
  *  - HTML(내비게이션)은 network-first: 온라인이면 항상 최신, 오프라인이면 캐시
  *  - 그 외 동일 출처 자산은 cache-first
  *  - 새 버전 배포 시: CACHE 버전을 올리면 클라이언트에 업데이트 바가 뜬다
  */
-const CACHE = "wbq-v3.4.1";
+const CACHE = "wbq-v3.4.2";
 const ASSETS = [
   "./",
   "./index.html",
