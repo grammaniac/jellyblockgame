@@ -3034,6 +3034,53 @@ document.addEventListener('dblclick', function(event) {
   };
   const charEls = { b:null, k:null, r:null };
 
+  // 캐릭터 행동 결과 대사 풀 — 같은 연출도 매번 신선하도록 랜덤 선택.
+  // 톤: 귀엽고 장난스럽게(얄밉지만 미워지지 않게). 등장 안내(튜토리얼)는 고정이라 여기 없음.
+  function pick(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+  const LINES = {
+    helpSwap: [   // 반짝이가 못 놓는 조각을 바꿔줌
+      ["🧡","반짝이의 변신!","못 놓던 조각을 바꿔줬어요."],
+      ["🧡","짠! 바꿔줄게요","이 조각이면 놓을 수 있죠?"],
+      ["🧡","반짝이가 도왔어요","막힌 조각, 살짝 바꿨어요!"],
+    ],
+    helpCrack: [  // 반짝이가 돌에 금을 냄
+      ["🧡","반짝이가 금을 냈어요!","한 번만 더 깨면 돼요."],
+      ["🧡","톡! 금이 갔어요","이제 한 방이면 끝!"],
+      ["🧡","반짝이의 한 방","돌에 금~ 거의 다 됐어요."],
+    ],
+    helpCoin: [   // 반짝이가 코인 선물
+      ["🧡","반짝이의 선물!","+5 🪙"],
+      ["🧡","코인 받아요~","반짝이가 +5 🪙 줬어요!"],
+      ["🧡","깜짝 선물!","+5 🪙 짜잔!"],
+    ],
+    inkDraw: [    // 끄적이가 잉크 낙서 (약올림)
+      ["🖤","끄적이의 낙서!","3턴간 그 칸을 못 써요. 망치로 즉시 제거 가능!"],
+      ["🖤","낙서 쓱쓱~","여기 막아놨지롱! 3턴 뒤 사라져요."],
+      ["🖤","메~롱! 낙서다","망치로 지울 수 있으면 지워보든가?"],
+    ],
+    inkFixed: [   // 끄적이가 돌을 고침 (약올림)
+      ["🖤","끄적이가 돌을 고쳤어요!","다시 두 번 깨야 해요."],
+      ["🖤","뚝딱! 고쳤지롱~","아까 안 부수더니~ 메롱!"],
+      ["🖤","수리 완~료!","이제 처음부터 다시 깨야 해요. 히히"],
+    ],
+    inkFled: [    // 끄적이를 막아냄 (플레이어 통쾌)
+      ["💨","끄적이가 도망갔어요!","수리를 막아냈어요."],
+      ["💨","끄적이 줄행랑~","제때 부쉈어요! 잘했어요."],
+      ["💨","훅 도망쳤어요","끄적이 작전 실패! 멋져요."],
+    ],
+    bossFled: [   // 부글이를 막아냄 (플레이어 통쾌)
+      ["💨","부글이가 물러갔어요!","변이를 막아냈어요."],
+      ["💨","부글이 후퇴!","그 줄을 지웠어요. 깔끔!"],
+      ["💨","변이 저지 성공","부글이가 분해서 사라졌어요."],
+    ],
+    bossMutate: [ // 부글이 변이 성공 (약올림)
+      ["🔴","부글이의 변이!","젤리가 암조직이 됐어요. 4번 깨야 해요. (망치=수술)"],
+      ["🔴","부글~ 변이 완료","막을 수 있었는데~ 4번 깨야 해요. (망치=수술)"],
+      ["🔴","흐흐, 변이 성공","암조직이 됐어요. 4번 깨거나 망치로 수술!"],
+    ],
+  };
+  function sayLine(arr){ const m=pick(arr); showToast(m[0],m[1],m[2]); }
+
   // 스테이지별 등장 파라미터 (배치 N회마다 행동)
   function charParams(stage){
     if(stage <= 5) return null;
@@ -3144,7 +3191,7 @@ document.addEventListener('dblclick', function(event) {
             pieces[deadIdx]=f;
             renderTray();
             S.fanfare();
-            showToast("🧡","반짝이의 변신!","못 놓던 조각을 바꿔줬어요.");
+            sayLine(LINES.helpSwap);
             saveRun();
           }
         }
@@ -3172,7 +3219,7 @@ document.addEventListener('dblclick', function(event) {
           renderBoard();
           S.booster();
           vibrate(15);
-          showToast("🧡","반짝이가 금을 냈어요!","한 번만 더 깨면 돼요.");
+          sayLine(LINES.helpCrack);
           saveRun();
         }
         charWinkOut("b");
@@ -3186,7 +3233,7 @@ document.addEventListener('dblclick', function(event) {
       Storage.data.coins += 5;
       updateHud();
       S.booster();
-      showToast("🧡","반짝이의 선물!","+5 🪙");
+      sayLine(LINES.helpCoin);
       saveRun();
       charWinkOut("b");
     }, 650);
@@ -3229,7 +3276,7 @@ document.addEventListener('dblclick', function(event) {
           renderBoard();
           S.invalid();
           vibrate(15);
-          showToast("🖤","끄적이의 낙서!","3턴간 그 칸을 못 써요. 망치로 즉시 제거 가능!");
+          sayLine(LINES.inkDraw);
           saveRun();
         }
         charTeaseOut();
@@ -3287,7 +3334,7 @@ document.addEventListener('dblclick', function(event) {
         // 끄적이가 노리던 돌을 부쉈다!
         modeState.kkPending=null;
         charLeave("k", true);
-        showToast("💨","끄적이가 도망갔어요!","수리를 막아냈어요.");
+        sayLine(LINES.inkFled);
       }else{
         kp.left--;
         const el=charEls.k;
@@ -3301,7 +3348,7 @@ document.addEventListener('dblclick', function(event) {
           setTimeout(()=>cell.classList.remove("stonehit"),400);
           S.invalid();
           vibrate([10,40,10]);
-          showToast("🖤","끄적이가 돌을 고쳤어요!","다시 두 번 깨야 해요.");
+          sayLine(LINES.inkFixed);
           charTeaseOut();
         }
       }
@@ -3314,7 +3361,7 @@ document.addEventListener('dblclick', function(event) {
         // 타깃 젤리가 사라졌다! 부글이 분해서 퇴장
         modeState.bossPending=null;
         charLeave("r", true);
-        showToast("💨","부글이가 물러갔어요!","변이를 막아냈어요.");
+        sayLine(LINES.bossFled);
       }else{
         bp.left--;
         const el=charEls.r;
@@ -3333,7 +3380,7 @@ document.addEventListener('dblclick', function(event) {
             changed=true;
             S.gameover();
             vibrate([20,60,20,60]);
-            showToast("🔴","부글이의 변이!","젤리가 암조직이 됐어요. 4번 깨야 해요. (망치=수술)");
+            sayLine(LINES.bossMutate);
             updateHud();
             charLaughOut();
           }else{
