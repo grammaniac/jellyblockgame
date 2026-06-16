@@ -170,6 +170,16 @@
     60%{transform:translate(-4px,2px);}
     80%{transform:translate(4px,-2px);}
   }
+  /* 강한 흔들림: 높은 콤보·위기 탈출 등 큰 순간용 (진폭·회전 ↑) */
+  .frame.shake-hard{ animation:shakeHard .5s ease; }
+  @keyframes shakeHard{
+    0%,100%{transform:translate(0,0);}
+    15%{transform:translate(-9px,5px) rotate(-1deg);}
+    30%{transform:translate(9px,-5px) rotate(1deg);}
+    45%{transform:translate(-8px,4px) rotate(-.8deg);}
+    60%{transform:translate(8px,-4px) rotate(.8deg);}
+    80%{transform:translate(-5px,2px);}
+  }
   .board{
     position:relative;
     display:grid;
@@ -386,6 +396,19 @@
     -webkit-text-fill-color:transparent; color:transparent;
     text-shadow:none;
     filter:drop-shadow(0 0 16px rgba(255,220,120,.85)) drop-shadow(0 4px 5px rgba(0,0,0,.65));
+    animation:combo 1.3s ease-out forwards;
+  }
+  /* 콤보가 매울수록 배너를 키운다 (단계별 차등) */
+  .combobanner.hot{ font-size:60px; }
+  .combobanner.blaze{ font-size:72px; }
+  /* 위기 탈출: 보드가 꽉 찼다가 여러 줄 클리어 — 청록 그라디언트로 통쾌함 강조 */
+  .combobanner.rescue{
+    font-size:56px;
+    background:linear-gradient(90deg,#27c8a8,#3fb0d9,#54bd6e);
+    -webkit-background-clip:text; background-clip:text;
+    -webkit-text-fill-color:transparent; color:transparent;
+    text-shadow:none;
+    filter:drop-shadow(0 0 16px rgba(120,230,200,.9)) drop-shadow(0 4px 5px rgba(0,0,0,.6));
     animation:combo 1.3s ease-out forwards;
   }
   @keyframes combo{
@@ -914,7 +937,7 @@
     .charSprite.winking .weye{ animation:none; }
     .charSprite.teasing .tongue{ animation:none; }
     .charSprite.laughing svg{ animation:none; }
-    .frame.shake{ animation:none; }
+    .frame.shake, .frame.shake-hard{ animation:none; }
     .particle{ display:none; }
     .blk.rainbow{ animation:none; }
     .cell.pop .blk{ animation:none; }
@@ -2224,6 +2247,11 @@ document.addEventListener('dblclick', function(event) {
       const clears=findClears();
       const lines=clears.rows.length+clears.cols.length;
 
+      // 아슬아슬 판정: 클리어가 일어나기 "직전"의 보드 채움률을 먼저 잰다.
+      let fillBefore=0;
+      for(let r=0;r<SIZE;r++)for(let c=0;c<SIZE;c++) if(board[r][c]) fillBefore++;
+      const fillRatio = fillBefore/(SIZE*SIZE);
+
       if(lines>0){
         combo++;
         if(combo > Storage.data.stats.maxCombo){
@@ -2288,17 +2316,35 @@ document.addEventListener('dblclick', function(event) {
         const brect=boardEl.getBoundingClientRect();
         scorePop("+"+gain, brect.left+brect.width/2, brect.top+brect.height/2);
         scorePop("+"+coinReward+" 🪙", brect.left+brect.width/2, brect.top+brect.height/2 + 26);
-        if(sameColorLines>0){
+        // 콤보 단계: 5+ 부터 매워지고, 10+ 는 최강. 배너 크기·흔들림에 차등.
+        const comboHot = combo>=5, comboBlaze = combo>=10;
+        const hotClass = comboBlaze ? "blaze" : (comboHot ? "hot" : "");
+        const bigShake = comboHot;  // 콤보 5+ 면 강한 흔들림
+        // 위기 탈출: 보드가 거의 꽉 찬 상태(78%+)에서 2줄 이상 한 번에 지움.
+        const rescue = fillRatio>=0.78 && lines>=2;
+
+        if(rescue){
           S.fanfare();
-          comboBanner("SAME COLOR!", true);
-          shake();
+          comboBanner("위기 탈출!", false, "rescue");
+          shake(true);
+          vibrate([15,40,15,40,15]);
+        }else if(sameColorLines>0){
+          S.fanfare();
+          comboBanner("SAME COLOR!", true, hotClass);
+          shake(true);
           vibrate([20,40,20]);
         }else{
           S.clear(lines,combo);
-          vibrate(15);
+          vibrate(bigShake?[10,30,10]:15);
           if(lines>=2){
-            comboBanner(lines>=3 ? "TRIPLE!" : "DOUBLE!");
-            shake();
+            comboBanner(lines>=3 ? "TRIPLE!" : "DOUBLE!", false, hotClass);
+            shake(bigShake);
+          }else if(comboBlaze){
+            comboBanner("COMBO x"+combo+" 🔥", false, "blaze");
+            shake(true);
+          }else if(comboHot){
+            comboBanner("COMBO x"+combo+" 🔥", false, "hot");
+            shake(true);
           }else if(combo>1){
             comboBanner("COMBO x"+combo);
           }
@@ -2416,17 +2462,19 @@ document.addEventListener('dblclick', function(event) {
     document.body.appendChild(el);
     setTimeout(()=>el.remove(),950);
   }
-  function comboBanner(text,special){
+  function comboBanner(text,special,extra){
     const el=document.createElement("div");
-    el.className="combobanner"+(special?" special":"");
+    el.className="combobanner"+(special?" special":"")+(extra?(" "+extra):"");
     el.textContent=text;
     document.body.appendChild(el);
-    setTimeout(()=>el.remove(),special?1300:950);
+    // special·rescue는 큰 연출이라 조금 더 오래 띄운다.
+    const big = special || extra==="rescue";
+    setTimeout(()=>el.remove(), big?1300:950);
   }
-  function shake(){
-    frameEl.classList.remove("shake");
+  function shake(hard){
+    frameEl.classList.remove("shake","shake-hard");
     void frameEl.offsetWidth;
-    frameEl.classList.add("shake");
+    frameEl.classList.add(hard ? "shake-hard" : "shake");
   }
   function showToast(icon, title, body){
     const t=document.createElement("div");
