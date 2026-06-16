@@ -244,6 +244,29 @@
       radial-gradient(circle at 65% 40%, #ffffff 0 13%, rgba(255,255,255,0) 14.5%),
       radial-gradient(circle at 30% 18%, rgba(255,255,255,.75) 0 5%, rgba(255,255,255,0) 12%);
   }
+  /* 젤리 표정 — 일반 젤리(.blk)에만. 돌/잉크/보석은 .blk.stone/.blk.ink로 ::after를 따로 쓰므로
+     아래 규칙이 그쪽을 건드리지 않게 :not()으로 막는다. */
+  .blk:not(.stone):not(.ink).blink::after{ animation:jellyBlink .26s ease; }
+  @keyframes jellyBlink{
+    0%,100%{ transform:scaleY(1); }
+    45%,55%{ transform:scaleY(.12); }
+  }
+  .blk:not(.stone):not(.ink).happy::after{ animation:jellyHappy .5s ease; }
+  /* 행복: 눈을 ^^ 모양(위로 휘어진 곡선)으로 잠깐 바꿨다 돌아온다 */
+  @keyframes jellyHappy{
+    0%,100%{
+      background:
+        radial-gradient(circle at 36% 39%, #23233d 0 6.5%, rgba(0,0,0,0) 8%),
+        radial-gradient(circle at 64% 39%, #23233d 0 6.5%, rgba(0,0,0,0) 8%),
+        radial-gradient(circle at 35% 40%, #fff 0 13%, rgba(255,255,255,0) 14.5%),
+        radial-gradient(circle at 65% 40%, #fff 0 13%, rgba(255,255,255,0) 14.5%);
+    }
+    25%,75%{
+      background:
+        radial-gradient(circle at 36% 44%, transparent 0 9%, #23233d 9% 11%, transparent 11.5%),
+        radial-gradient(circle at 64% 44%, transparent 0 9%, #23233d 9% 11%, transparent 11.5%);
+    }
+  }
   .cell.filled .blk{ display:block; }
   .cell.pop .blk{ animation:jellypop .38s cubic-bezier(.34,1.56,.64,1); }
   @keyframes jellypop{
@@ -941,6 +964,7 @@
     .particle{ display:none; }
     .blk.rainbow{ animation:none; }
     .cell.pop .blk{ animation:none; }
+    .blk.blink::after, .blk.happy::after{ animation:none; }
     .iconbtn.alert{ animation:none; }
     .slot.tut-pulse{ animation:none; }
     .slot .rotbadge{ animation:none; }
@@ -2203,6 +2227,7 @@ document.addEventListener('dblclick', function(event) {
       cell.classList.remove("pop");
       void cell.offsetWidth;
       cell.classList.add("pop");
+      jellyFace(r, c, "blink", 280);  // 새로 놓인 젤리가 눈 깜빡
     });
 
     // Check rainbow trigger
@@ -2350,6 +2375,20 @@ document.addEventListener('dblclick', function(event) {
           }
         }
 
+        // 행복 표정: 지워지는 줄에 인접한 '살아남는' 일반 젤리가 잠깐 웃는다.
+        // (지워질 셀은 jellyFace 내부에서 board 값으로 걸러지므로 자연히 제외됨)
+        const clearSet = new Set(uniq.map(x=>x.join(",")));
+        const smiled = new Set();
+        uniq.forEach(([r,c])=>{
+          [[r-1,c],[r+1,c],[r,c-1],[r,c+1]].forEach(([rr,cc])=>{
+            if(rr<0||cc<0||rr>=SIZE||cc>=SIZE) return;
+            const key=rr+","+cc;
+            if(clearSet.has(key) || smiled.has(key)) return;
+            smiled.add(key);
+            jellyFace(rr, cc, "happy", 520);
+          });
+        });
+
         updateHud();
         busy=true;
         setTimeout(()=>{
@@ -2475,6 +2514,18 @@ document.addEventListener('dblclick', function(event) {
     frameEl.classList.remove("shake","shake-hard");
     void frameEl.offsetWidth;
     frameEl.classList.add(hard ? "shake-hard" : "shake");
+  }
+  // 젤리 표정 — 일반 젤리 셀에만 잠깐 표정 클래스를 붙였다 뗀다.
+  // 돌·잉크·보석·암조직·특수젤리는 제외(눈 없거나 표정이 어색).
+  function jellyFace(r, c, face, dur){
+    const v = board[r] && board[r][c];
+    if(!v || v.stone || v.ink || v.special) return;
+    const blk = cellEls[r][c] && cellEls[r][c].querySelector(".blk");
+    if(!blk) return;
+    blk.classList.remove(face);
+    void blk.offsetWidth;
+    blk.classList.add(face);
+    setTimeout(()=>{ if(blk) blk.classList.remove(face); }, dur||300);
   }
   function showToast(icon, title, body){
     const t=document.createElement("div");
