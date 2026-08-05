@@ -13,7 +13,7 @@
 <link rel="manifest" href="manifest.webmanifest" />
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png" />
 <link rel="apple-touch-icon" href="apple-touch-icon.png" />
-<title>젤리 블록 퀘스트</title>
+<title>Jelly Quest — 젤리 퀘스트</title>
 <style>
   :root{
     --cell: 44px;
@@ -1052,7 +1052,6 @@
 .cinegate-bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
 .cinegate-veil{position:absolute;inset:0;background:linear-gradient(180deg,rgba(22,16,22,0) 40%,rgba(22,16,22,.55) 100%)}
 .cinegate-txt{position:absolute;left:0;right:0;bottom:14%;text-align:center}
-.cinegate-title{font-size:30px;font-weight:800;letter-spacing:.06em;background:linear-gradient(120deg,#d9a94c,#c2557e);-webkit-background-clip:text;background-clip:text;color:transparent;text-shadow:0 2px 14px rgba(255,255,255,.25)}
 .cinegate-tap{margin-top:14px;color:rgba(255,255,255,.92);font-size:15px;animation:gatePulse 1.6s ease-in-out infinite}
 @keyframes gatePulse{0%,100%{opacity:.45}50%{opacity:1}}
 </style>
@@ -1061,7 +1060,7 @@
 
   <div class="topbar">
     <button class="iconbtn" id="menuBtn" aria-label="메뉴" title="메뉴">&#9776;</button>
-    <div class="title">젤리 블록 퀘스트<small>JELLY BLOCK QUEST</small></div>
+    <div class="title">젤리 퀘스트<small>JELLY QUEST</small></div>
     <div class="btnrow">
       <div class="coinbox"><span class="icon">🪙</span><span id="coinCount">0</span></div>
       <button class="iconbtn" id="fsBtn" aria-label="전체 화면" title="전체 화면">⛶</button>
@@ -1101,7 +1100,7 @@
   <!-- Main menu modal -->
   <div class="overlay" id="menuOverlay">
     <div class="modal">
-      <h2>젤리 블록 퀘스트</h2>
+      <h2>젤리 퀘스트</h2>
       <div class="sub">모드를 선택하세요</div>
       <div class="menu-modes" id="modeList"></div>
       <div class="menu-foot">
@@ -1803,7 +1802,7 @@ document.addEventListener('dblclick', function(event) {
    * 영상은 음소거 재생(자동재생 정책): 소리는 BGM/효과음이 담당.
    * 로딩 실패·미지원 시 조용히 건너뛴다 (게임 진행을 절대 막지 않음). */
   const CINE = {
-    intro: { url:"media/video/intro.mp4",            flag:"cineIntroSeen2" },
+    intro: { url:"media/video/intro.mp4",            flag:"cineIntroSeen3" },
     grape: { url:"media/video/transition_grape.mp4", flag:"cineGrapeSeen2", snd:"cineGrape" },
     boss:  { url:"media/video/transition_boss.mp4",  flag:"cineBossSeen2",  snd:"cineBoss" }
   };
@@ -1852,10 +1851,9 @@ document.addEventListener('dblclick', function(event) {
   function showIntroGate(onStart){
     const g = document.createElement("div");
     g.className = "cinegate";
-    g.innerHTML = '<img class="cinegate-bg" src="media/splash.jpg" alt="">'
+    g.innerHTML = '<img class="cinegate-bg" src="media/title.jpg" alt="">'
       + '<div class="cinegate-veil"></div>'
-      + '<div class="cinegate-txt"><div class="cinegate-title">젤리 블록 퀘스트</div>'
-      + '<div class="cinegate-tap">탭하여 시작</div></div>';
+      + '<div class="cinegate-txt"><div class="cinegate-tap">탭하여 시작</div></div>';
     document.body.appendChild(g);
     let ab = null;
     fetch(SFX_URL.cineIntro)
@@ -3922,7 +3920,7 @@ document.addEventListener('dblclick', function(event) {
    *  TUTORIAL
    * ============================================================ */
   const tutSteps = [
-    { title:"환영합니다!", body:"젤리 블록 퀘스트에 오신 것을 환영합니다. 트레이의 블록을 드래그해서 보드에 놓아보세요." },
+    { title:"환영합니다!", body:"젤리 퀘스트에 오신 것을 환영합니다. 트레이의 블록을 드래그해서 보드에 놓아보세요." },
     { title:"줄을 채우세요", body:"가로 또는 세로 한 줄을 가득 채우면 사라지며 점수를 얻습니다. 콤보를 노려보세요!" },
     { title:"특수 능력", body:"같은 색으로 줄을 채우면 보너스! 🌈 무지개 블록은 가로/세로를 모두 지웁니다. ⭐ 황금 블록은 추가 점수." },
     { title:"부스터 활용", body:"코인으로 부스터를 사용하세요. 🔨 망치는 단일 블록 제거, 💣 폭탄은 3x3 제거, 💡 힌트는 배치 위치 표시!" },
