@@ -1047,6 +1047,14 @@
 .cinewrap.out{opacity:0}
 .cinewrap video{width:100%;height:100%;object-fit:contain}
 .cineskip{position:absolute;bottom:max(24px, env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);color:rgba(255,255,255,.78);font-size:13px;background:rgba(90,70,88,.5);padding:8px 14px;border-radius:999px;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);pointer-events:none}
+/* 타이틀 게이트 (최초 1회) */
+.cinegate{position:fixed;inset:0;z-index:410;background:#161016;cursor:pointer}
+.cinegate-bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.cinegate-veil{position:absolute;inset:0;background:linear-gradient(180deg,rgba(22,16,22,0) 40%,rgba(22,16,22,.55) 100%)}
+.cinegate-txt{position:absolute;left:0;right:0;bottom:14%;text-align:center}
+.cinegate-title{font-size:30px;font-weight:800;letter-spacing:.06em;background:linear-gradient(120deg,#d9a94c,#c2557e);-webkit-background-clip:text;background-clip:text;color:transparent;text-shadow:0 2px 14px rgba(255,255,255,.25)}
+.cinegate-tap{margin-top:14px;color:rgba(255,255,255,.92);font-size:15px;animation:gatePulse 1.6s ease-in-out infinite}
+@keyframes gatePulse{0%,100%{opacity:.45}50%{opacity:1}}
 </style>
 </head>
 <body>
@@ -1541,13 +1549,16 @@ document.addEventListener('dblclick', function(event) {
     newpieces:"media/sfx/newpieces.mp3", gameover:"media/sfx/gameover.mp3",
     helperAppear:"media/sfx/helper_appear.mp3", helperWink:"media/sfx/helper_wink.mp3",
     villainTease:"media/sfx/villain_tease.mp3", villainFlee:"media/sfx/villain_flee.mp3",
-    bossAppear:"media/sfx/boss_appear.mp3", bossSmirk:"media/sfx/boss_smirk.mp3"
+    bossAppear:"media/sfx/boss_appear.mp3", bossSmirk:"media/sfx/boss_smirk.mp3",
+    cineIntro:"media/sfx/cine_intro.m4a", cineGrape:"media/sfx/cine_grape.mp3",
+    cineBoss:"media/sfx/cine_boss.mp3"
   };
   /* 파일은 전부 피크 -1dB 정규화 상태 → 상대 밸런스는 여기서 조정 */
   const SFX_VOL = {
     place:.5, clear:.55, fanfare:.6, click:.35, invalid:.45, coin:.5, booster:.55,
     rotate:.4, pickup:.4, newpieces:.45, gameover:.55, helperAppear:.55, helperWink:.5,
-    villainTease:.6, villainFlee:.55, bossAppear:.6, bossSmirk:.65
+    villainTease:.6, villainFlee:.55, bossAppear:.6, bossSmirk:.65,
+    cineIntro:.65, cineGrape:.6, cineBoss:.65
   };
   const sfxBuf = {};
   let sfxLoadStarted = false;
@@ -1792,9 +1803,9 @@ document.addEventListener('dblclick', function(event) {
    * 영상은 음소거 재생(자동재생 정책): 소리는 BGM/효과음이 담당.
    * 로딩 실패·미지원 시 조용히 건너뛴다 (게임 진행을 절대 막지 않음). */
   const CINE = {
-    intro: { url:"media/video/intro.mp4",            flag:"cineIntroSeen" },
-    grape: { url:"media/video/transition_grape.mp4", flag:"cineGrapeSeen" },
-    boss:  { url:"media/video/transition_boss.mp4",  flag:"cineBossSeen" }
+    intro: { url:"media/video/intro.mp4",            flag:"cineIntroSeen2" },
+    grape: { url:"media/video/transition_grape.mp4", flag:"cineGrapeSeen2", snd:"cineGrape" },
+    boss:  { url:"media/video/transition_boss.mp4",  flag:"cineBossSeen2",  snd:"cineBoss" }
   };
   function playCinematic(key){
     const c = CINE[key];
@@ -1817,12 +1828,15 @@ document.addEventListener('dblclick', function(event) {
     wrap.appendChild(v);
     wrap.appendChild(skip);
     document.body.appendChild(wrap);
+    if(c.snd) playFile(c.snd);   // 전환 스팅어 (게임 중이라 오디오 해제 상태)
     let closed = false;
     const close = ()=>{
       if(closed) return;
       closed = true;
       wrap.classList.add("out");
       setTimeout(()=>{ try{ v.pause(); }catch(e){} wrap.remove(); }, 420);
+      // 시네마틱이 끝나면 곧장 음악 — 인트로 뒤 첫 화면부터 BGM이 흐르게
+      try{ startBGM(); }catch(e){}
     };
     wrap.addEventListener("pointerdown", close);
     v.addEventListener("ended", close);
@@ -1831,6 +1845,33 @@ document.addEventListener('dblclick', function(event) {
     if(p && p.catch) p.catch(()=>close());
     setTimeout(()=>{ if(!closed && v.readyState < 2) close(); }, 4000); // 로딩 안전장치
     requestAnimationFrame(()=>wrap.classList.add("in"));
+  }
+
+  /* 최초 1회 타이틀 게이트: 자동재생 정책상 소리는 사용자 제스처 후에만 가능하므로,
+   * "탭하여 시작" 한 번으로 오디오를 해제한 뒤 인트로를 징글과 함께 재생한다. */
+  function showIntroGate(onStart){
+    const g = document.createElement("div");
+    g.className = "cinegate";
+    g.innerHTML = '<img class="cinegate-bg" src="media/splash.jpg" alt="">'
+      + '<div class="cinegate-veil"></div>'
+      + '<div class="cinegate-txt"><div class="cinegate-title">젤리 블록 퀘스트</div>'
+      + '<div class="cinegate-tap">탭하여 시작</div></div>';
+    document.body.appendChild(g);
+    let ab = null;
+    fetch(SFX_URL.cineIntro)
+      .then(r=>{ if(r.ok) return r.arrayBuffer(); })
+      .then(b=>{ ab = b || null; })
+      .catch(()=>{});
+    g.addEventListener("pointerdown", ()=>{
+      try{
+        audio(); loadAllSfx();
+        if(sfxBuf.cineIntro){ playFile("cineIntro"); }
+        else if(ab){ audio().decodeAudioData(ab, (buf)=>{ sfxBuf.cineIntro=buf; playFile("cineIntro"); }, ()=>{}); }
+      }catch(e){}
+      g.remove();
+      playCinematic("intro");
+      onStart();
+    }, { once:true });
   }
 
   /* ============================================================
@@ -4392,7 +4433,7 @@ document.addEventListener('dblclick', function(event) {
   // 첫 터치 한 번으로 AudioContext를 미리 깨워둔다.
   window.addEventListener("pointerdown", ()=>{ try{ audio(); loadAllSfx(); }catch(e){} }, { once:true, passive:true });
   // 이후의 터치마다 좀비 컨텍스트인지 가볍게 점검 (복귀 직후 첫 입력에서 무음 방지)
-  window.addEventListener("pointerdown", ()=>{ try{ ensureAudioAlive(); }catch(e){} }, { passive:true });
+  window.addEventListener("pointerdown", ()=>{ try{ ensureAudioAlive(); if(!bgmStarted) startBGM(); }catch(e){} }, { passive:true });
 
   let bgmWasOn = false;
   document.addEventListener("visibilitychange",()=>{
@@ -4502,7 +4543,7 @@ document.addEventListener('dblclick', function(event) {
     openMenu();
   });
 
-  playCinematic("intro");   // 최초 1회 인트로 (탭으로 스킵)
+  function bootFlow(){
   if(!Storage.data.tutorialDone){
     bootInitialBoard();
     showTutorial();
@@ -4520,6 +4561,14 @@ document.addEventListener('dblclick', function(event) {
       if(next) startStage(next);
       else openMenu();
     }
+  }
+  }
+  // 최초 1회: 타이틀 게이트(탭=오디오 해제) → 인트로+징글 → 게임. 이후엔 바로 게임.
+  if(!Storage.data[CINE.intro.flag]){
+    bootInitialBoard();
+    showIntroGate(bootFlow);
+  }else{
+    bootFlow();
   }
 })();
 </script>
