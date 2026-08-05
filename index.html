@@ -1041,6 +1041,12 @@
   @media (prefers-reduced-motion: reduce){
     .cell.stonehit .blk{ animation:none; }
   }
+/* 시네마틱(인트로/챕터 전환) 오버레이 */
+.cinewrap{position:fixed;inset:0;z-index:400;background:#161016;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .4s ease}
+.cinewrap.in{opacity:1}
+.cinewrap.out{opacity:0}
+.cinewrap video{width:100%;height:100%;object-fit:contain}
+.cineskip{position:absolute;bottom:max(24px, env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);color:rgba(255,255,255,.78);font-size:13px;background:rgba(90,70,88,.5);padding:8px 14px;border-radius:999px;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);pointer-events:none}
 </style>
 </head>
 <body>
@@ -1481,6 +1487,7 @@ document.addEventListener('dblclick', function(event) {
   let modeState = {};
   let cellEls = [];
   let bgmGain = null, bgmTimers=[], bgmStarted=false;
+  let bgmSet = "ch1", bgmIdx = 0, bgmSrc = null;   // 파일 BGM 로테이션 상태
   let lastDragEndTime = 0;
   let rng = Math.random;  // explicit RNG, swapped to seeded only for daily mode
   let lastVW = 0, lastVH = 0, resizeQueued = false;
@@ -1522,6 +1529,51 @@ document.addEventListener('dblclick', function(event) {
     }
     if(actx.state==="suspended") actx.resume();
     return actx;
+  }
+
+  /* ===== 파일 기반 효과음 (Higgsfield 제작 에셋) ==========================
+   * - 로드 성공 시 파일 재생, 미로드/실패 시 아래 합성음 폴백 (오프라인 최초 실행 대비)
+   * - AudioBuffer는 컨텍스트 독립: rebuildAudio(좀비 대응) 후에도 재사용 가능 */
+  const SFX_URL = {
+    place:"media/sfx/place.mp3", clear:"media/sfx/clear.mp3", fanfare:"media/sfx/fanfare.mp3",
+    click:"media/sfx/click.mp3", invalid:"media/sfx/invalid.mp3", coin:"media/sfx/coin.mp3",
+    booster:"media/sfx/booster.mp3", rotate:"media/sfx/rotate.mp3", pickup:"media/sfx/pickup.mp3",
+    newpieces:"media/sfx/newpieces.mp3", gameover:"media/sfx/gameover.mp3",
+    helperAppear:"media/sfx/helper_appear.mp3", helperWink:"media/sfx/helper_wink.mp3",
+    villainTease:"media/sfx/villain_tease.mp3", villainFlee:"media/sfx/villain_flee.mp3",
+    bossAppear:"media/sfx/boss_appear.mp3", bossSmirk:"media/sfx/boss_smirk.mp3"
+  };
+  /* 파일은 전부 피크 -1dB 정규화 상태 → 상대 밸런스는 여기서 조정 */
+  const SFX_VOL = {
+    place:.5, clear:.55, fanfare:.6, click:.35, invalid:.45, coin:.5, booster:.55,
+    rotate:.4, pickup:.4, newpieces:.45, gameover:.55, helperAppear:.55, helperWink:.5,
+    villainTease:.6, villainFlee:.55, bossAppear:.6, bossSmirk:.65
+  };
+  const sfxBuf = {};
+  let sfxLoadStarted = false;
+  function loadAllSfx(){
+    if(sfxLoadStarted) return;
+    sfxLoadStarted = true;
+    Object.keys(SFX_URL).forEach(name=>{
+      fetch(SFX_URL[name])
+        .then(r=>{ if(!r.ok) throw new Error("sfx fetch"); return r.arrayBuffer(); })
+        .then(ab=> new Promise((res,rej)=> audio().decodeAudioData(ab,res,rej)))
+        .then(buf=>{ sfxBuf[name]=buf; })
+        .catch(()=>{});   // 실패해도 합성음 폴백이 있으므로 조용히 무시
+    });
+  }
+  function playFile(name){
+    if(!Storage.data.settings.sfx) return true;   // 설정 꺼짐: 처리된 것으로 간주(무음)
+    const buf = sfxBuf[name];
+    if(!buf) return false;                         // 미로드: 호출부가 합성음 폴백
+    try{
+      const a=audio(), src=a.createBufferSource(), g=a.createGain();
+      src.buffer=buf;
+      g.gain.value = SFX_VOL[name]||0.5;
+      src.connect(g).connect(master);
+      src.start();
+      return true;
+    }catch(e){ return false; }
   }
 
   /* iOS '좀비 AudioContext' 대응
@@ -1577,10 +1629,11 @@ document.addEventListener('dblclick', function(event) {
     src.start(t);
   }
   const S = {
-    pickup(){ tone(520,0.09,"triangle",0.16); tone(820,0.07,"triangle",0.1,0.05); },
-    place(){ tone(220,0.13,"sine",0.26,0,130); noise(0.07,0.14); },
-    invalid(){ tone(150,0.16,"sawtooth",0.16,0,95); tone(120,0.16,"sawtooth",0.12,0.08,80); },
+    pickup(){ if(playFile("pickup")) return; tone(520,0.09,"triangle",0.16); tone(820,0.07,"triangle",0.1,0.05); },
+    place(){ if(playFile("place")) return; tone(220,0.13,"sine",0.26,0,130); noise(0.07,0.14); },
+    invalid(){ if(playFile("invalid")) return; tone(150,0.16,"sawtooth",0.16,0,95); tone(120,0.16,"sawtooth",0.12,0.08,80); },
     clear(lines,cmb){
+      if(playFile("clear")) return;
       const penta=[523.25,587.33,659.25,783.99,880,1046.5,1174.66,1318.5];
       const start=Math.min(cmb-1,4);
       const count=Math.min(3+lines,7);
@@ -1588,13 +1641,15 @@ document.addEventListener('dblclick', function(event) {
         tone(penta[Math.min(start+i,penta.length-1)],0.16,"triangle",0.2,i*0.06);
       tone(penta[Math.min(start+count,penta.length-1)],0.34,"sine",0.16,count*0.06);
     },
-    newpieces(){ tone(440,0.1,"sine",0.12); tone(660,0.1,"sine",0.1,0.08); },
-    rotate(){ tone(430,0.07,"square",0.13,0,560); tone(680,0.06,"triangle",0.1,0.05); },
+    newpieces(){ if(playFile("newpieces")) return; tone(440,0.1,"sine",0.12); tone(660,0.1,"sine",0.1,0.08); },
+    rotate(){ if(playFile("rotate")) return; tone(430,0.07,"square",0.13,0,560); tone(680,0.06,"triangle",0.1,0.05); },
     gameover(){
+      if(playFile("gameover")) return;
       const n=[440,349.23,293.66,220];
       n.forEach((f,i)=> tone(f,0.4,"sine",0.22,i*0.18));
     },
     fanfare(){
+      if(playFile("fanfare")) return;
       const tri=[523.25,659.25,783.99,1046.5];
       tri.forEach((f,i)=>{
         tone(f,0.2,"square",0.14,i*0.09);
@@ -1604,19 +1659,86 @@ document.addEventListener('dblclick', function(event) {
       tone(2093,0.5,"sine",0.12,0.66);
       noise(0.12,0.1,0.4);
     },
-    coin(){ tone(880,0.06,"sine",0.15); tone(1320,0.08,"sine",0.13,0.05); },
-    booster(){ tone(660,0.08,"square",0.14); tone(990,0.08,"sine",0.1,0.06); },
-    click(){ tone(600,0.06,"square",0.1); }
+    coin(){ if(playFile("coin")) return; tone(880,0.06,"sine",0.15); tone(1320,0.08,"sine",0.13,0.05); },
+    booster(){ if(playFile("booster")) return; tone(660,0.08,"square",0.14); tone(990,0.08,"sine",0.1,0.06); },
+    click(){ if(playFile("click")) return; tone(600,0.06,"square",0.1); },
+    /* 캐릭터 시그니처 (파일 전용, 미로드 시 근사 합성음) */
+    helperAppear(){ if(playFile("helperAppear")) return; this.coin(); },
+    helperWink(){ if(playFile("helperWink")) return; this.coin(); },
+    villainTease(){ if(playFile("villainTease")) return; this.invalid(); },
+    villainFlee(){ if(playFile("villainFlee")) return; this.rotate(); },
+    bossAppear(){ if(playFile("bossAppear")) return; this.invalid(); },
+    bossSmirk(){ if(playFile("bossSmirk")) return; this.invalid(); }
   };
 
-  /* BGM: a simple looping melody using Web Audio */
+  /* ===== BGM: 파일 3세트(챕터1·챕터2·보스) × A/B 로테이션 =================
+   * - 트랙이 끝나기 직전 파트너 트랙과 크로스페이드 → 루프 이음새 해결 + 청각 피로 감소
+   * - AudioBuffer는 컨텍스트 독립: rebuildAudio(좀비 대응) 후 재디코딩 없이 재사용
+   * - 파일 로드 실패(오프라인 최초 실행 등) 시 기존 합성 멜로디 루프 폴백 */
+  const BGM_SETS = {
+    ch1:["media/bgm/bgm_main_A.m4a","media/bgm/bgm_main_B.m4a"],
+    ch2:["media/bgm/bgm_chapter2_A.m4a","media/bgm/bgm_chapter2_B.m4a"],
+    boss:["media/bgm/bgm_boss_A.m4a","media/bgm/bgm_boss_B.m4a"]
+  };
+  const bgmBufs = {};
+  const BGM_FADE = 1.6, BGM_VOL = 0.32;
+  function bgmSetForStage(n){ return n>=21 ? "boss" : n>=12 ? "ch2" : "ch1"; }
+  function updateBGM(){
+    const want = (mode==="adventure" && modeState && modeState.stage)
+      ? bgmSetForStage(modeState.stage) : "ch1";
+    if(want !== bgmSet){
+      bgmSet = want; bgmIdx = 0;
+      if(bgmStarted){ stopBGM(); startBGM(); }
+    }
+  }
+  function loadBgm(url){
+    if(bgmBufs[url]) return Promise.resolve(bgmBufs[url]);
+    return fetch(url)
+      .then(r=>{ if(!r.ok) throw new Error("bgm fetch"); return r.arrayBuffer(); })
+      .then(ab=> new Promise((res,rej)=> audio().decodeAudioData(ab,res,rej)))
+      .then(buf=>{ bgmBufs[url]=buf; return buf; });
+  }
+  function playBgmBuf(buf){
+    const t = actx.currentTime;
+    const src = actx.createBufferSource();
+    src.buffer = buf;
+    const g = actx.createGain();
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.linearRampToValueAtTime(1, t+BGM_FADE);
+    const dur = buf.duration;
+    g.gain.setValueAtTime(1, t+dur-BGM_FADE);
+    g.gain.linearRampToValueAtTime(0.0001, t+dur);
+    src.connect(g).connect(bgmGain);
+    src.start(t);
+    src.stop(t+dur+0.05);
+    bgmSrc = src;
+    // 끝나기 BGM_FADE 전에 파트너 트랙 시작(크로스페이드). 타이머는 stopBGM이 청소.
+    const id = setTimeout(()=>{
+      if(!bgmStarted) return;
+      bgmIdx = 1 - bgmIdx;
+      loadBgm(BGM_SETS[bgmSet][bgmIdx])
+        .then(b=>{ if(bgmStarted) playBgmBuf(b); })
+        .catch(()=>{});
+    }, Math.max(0,(dur-BGM_FADE))*1000);
+    bgmTimers.push(id);
+  }
   function startBGM(){
     if(!Storage.data.settings.bgm || bgmStarted) return;
     audio();
     bgmStarted = true;
     bgmGain = actx.createGain();
-    bgmGain.gain.value = 0.07;
+    bgmGain.gain.value = BGM_VOL;
     bgmGain.connect(master);
+    const myGain = bgmGain;
+    loadBgm(BGM_SETS[bgmSet][bgmIdx])
+      .then(buf=>{ if(bgmStarted && bgmGain===myGain) playBgmBuf(buf); })
+      .catch(()=>{
+        // 폴백: 합성 루프 (음량은 기존 값으로 낮춤)
+        if(bgmStarted && bgmGain===myGain){ bgmGain.gain.value = 0.07; startSynthBGM(); }
+      });
+  }
+  /* 폴백 전용: 기존 합성 멜로디 루프 (startBGM이 bgmGain을 만든 뒤에만 호출) */
+  function startSynthBGM(){
     const notes = [
       [261.63, 0.5],[329.63, 0.5],[392.00, 0.5],[523.25, 0.5],
       [392.00, 0.5],[329.63, 0.5],[349.23, 0.5],[440.00, 0.5],
@@ -1656,6 +1778,7 @@ document.addEventListener('dblclick', function(event) {
     bgmTimers.forEach(clearTimeout);
     bgmTimers = [];
     bgmStarted = false;
+    if(bgmSrc){ try{ bgmSrc.stop(); }catch(e){} bgmSrc=null; }
     if(bgmGain){ try{ bgmGain.disconnect(); }catch(e){} bgmGain=null; }
   }
 
@@ -1663,6 +1786,51 @@ document.addEventListener('dblclick', function(event) {
     if(Storage.data.settings.vibration && navigator.vibrate){
       try{ navigator.vibrate(ms); }catch(e){}
     }
+  }
+
+  /* ===== 시네마틱(인트로/챕터 전환) — 최초 1회 자동재생, 탭으로 스킵 =======
+   * 영상은 음소거 재생(자동재생 정책): 소리는 BGM/효과음이 담당.
+   * 로딩 실패·미지원 시 조용히 건너뛴다 (게임 진행을 절대 막지 않음). */
+  const CINE = {
+    intro: { url:"media/video/intro.mp4",            flag:"cineIntroSeen" },
+    grape: { url:"media/video/transition_grape.mp4", flag:"cineGrapeSeen" },
+    boss:  { url:"media/video/transition_boss.mp4",  flag:"cineBossSeen" }
+  };
+  function playCinematic(key){
+    const c = CINE[key];
+    if(!c || Storage.data[c.flag]) return;
+    Storage.data[c.flag] = true;
+    Storage.save();
+    const wrap = document.createElement("div");
+    wrap.className = "cinewrap";
+    const v = document.createElement("video");
+    v.src = c.url;
+    v.muted = true;
+    v.autoplay = true;
+    v.playsInline = true;
+    v.setAttribute("playsinline","");
+    v.setAttribute("webkit-playsinline","");
+    v.setAttribute("muted","");
+    const skip = document.createElement("div");
+    skip.className = "cineskip";
+    skip.textContent = "탭하여 건너뛰기";
+    wrap.appendChild(v);
+    wrap.appendChild(skip);
+    document.body.appendChild(wrap);
+    let closed = false;
+    const close = ()=>{
+      if(closed) return;
+      closed = true;
+      wrap.classList.add("out");
+      setTimeout(()=>{ try{ v.pause(); }catch(e){} wrap.remove(); }, 420);
+    };
+    wrap.addEventListener("pointerdown", close);
+    v.addEventListener("ended", close);
+    v.addEventListener("error", close);
+    const p = v.play();
+    if(p && p.catch) p.catch(()=>close());
+    setTimeout(()=>{ if(!closed && v.readyState < 2) close(); }, 4000); // 로딩 안전장치
+    requestAnimationFrame(()=>wrap.classList.add("in"));
   }
 
   /* ============================================================
@@ -3027,6 +3195,10 @@ document.addEventListener('dblclick', function(event) {
     updateHud();
     renderObjective();
     saveRun();
+    updateBGM();
+    // 챕터 경계 시네마틱 (최초 1회): 21+ 보스 등장, 12+ 포도 보석
+    if(n>=21) playCinematic("boss");
+    else if(n>=12) playCinematic("grape");
   }
 
 
@@ -3230,7 +3402,7 @@ document.addEventListener('dblclick', function(event) {
     const el=charEls[type];
     if(!el) return;
     el.classList.remove("bob");
-    if(scared) el.classList.add("scared");
+    if(scared){ el.classList.add("scared"); if(type==="k") S.villainFlee(); }
     setTimeout(()=>{
       el.style.left=(type==="k" ? window.innerWidth+70 : -130)+"px";
       el.style.top="-130px";
@@ -3243,7 +3415,7 @@ document.addEventListener('dblclick', function(event) {
     const el=charEls[type];
     if(!el){ return; }
     el.classList.add("zoom");
-    setTimeout(()=>el.classList.add("winking"), 200);
+    setTimeout(()=>{ el.classList.add("winking"); S.helperWink(); }, 200);
     setTimeout(()=>{
       el.classList.remove("zoom","winking");
       charLeave(type);
@@ -3255,6 +3427,7 @@ document.addEventListener('dblclick', function(event) {
     const el=charEls.k;
     if(!el){ return; }
     el.classList.add("teasing");
+    S.villainTease();
     setTimeout(()=>{
       el.classList.remove("teasing");
       charLeave("k");
@@ -3281,7 +3454,7 @@ document.addEventListener('dblclick', function(event) {
     const deadIdx=pieces.findIndex(p=>p && !fitsAnyRotation(p));
     if(deadIdx>=0 && trayEl.children[deadIdx]){
       charFlyToRect("b", trayEl.children[deadIdx].getBoundingClientRect());
-      charIntro("b");
+      charIntro("b"); S.helperAppear();
       setTimeout(()=>{
         const p=pieces[deadIdx];
         if(p && !fitsAnyRotation(p)){
@@ -3306,7 +3479,7 @@ document.addEventListener('dblclick', function(event) {
     if(hard.length){
       const [r,c]=hard[Math.floor(Math.random()*hard.length)];
       charFlyToCell("b", r, c);
-      charIntro("b");
+      charIntro("b"); S.helperAppear();
       setTimeout(()=>{
         const v=board[r][c];
         if(v && v.stone && v.hp>=2){
@@ -3327,7 +3500,7 @@ document.addEventListener('dblclick', function(event) {
     }
     // 줄 일도 없으면 코인 선물
     charFlyToCell("b", 0, 2+Math.floor(Math.random()*4));
-    charIntro("b");
+    charIntro("b"); S.helperAppear();
     setTimeout(()=>{
       Storage.data.coins += 5;
       updateHud();
@@ -3399,7 +3572,7 @@ document.addEventListener('dblclick', function(event) {
     modeState.bossPending={r,c,left:3};
     charFlyToCell("r", r, c, 3);
     charIntro("r");
-    S.invalid();
+    S.bossAppear();
     vibrate([15,40,15]);
     return true;
   }
@@ -3408,6 +3581,7 @@ document.addEventListener('dblclick', function(event) {
     const el=charEls.r;
     if(!el) return;
     el.classList.add("zoom","laughing");
+    S.bossSmirk();
     setTimeout(()=>{
       el.classList.remove("zoom","laughing");
       charLeave("r");
@@ -3679,6 +3853,7 @@ document.addEventListener('dblclick', function(event) {
     renderTray();
     updateHud();
     renderObjective();
+    updateBGM();
     return true;
   }
 
@@ -3686,6 +3861,7 @@ document.addEventListener('dblclick', function(event) {
    *  NEW GAME
    * ============================================================ */
   function newGame(){
+    if(mode!=="adventure") updateBGM();   // 모험 밖에서는 챕터1 세트로
     board=Array.from({length:SIZE},()=>Array(SIZE).fill(null));
     score=0; combo=0; gameOver=false;
     displayScore=0;
@@ -4214,7 +4390,7 @@ document.addEventListener('dblclick', function(event) {
 
   // iOS: 오디오는 사용자 제스처 안에서 생성/resume 해야 소리가 난다.
   // 첫 터치 한 번으로 AudioContext를 미리 깨워둔다.
-  window.addEventListener("pointerdown", ()=>{ try{ audio(); }catch(e){} }, { once:true, passive:true });
+  window.addEventListener("pointerdown", ()=>{ try{ audio(); loadAllSfx(); }catch(e){} }, { once:true, passive:true });
   // 이후의 터치마다 좀비 컨텍스트인지 가볍게 점검 (복귀 직후 첫 입력에서 무음 방지)
   window.addEventListener("pointerdown", ()=>{ try{ ensureAudioAlive(); }catch(e){} }, { passive:true });
 
@@ -4326,6 +4502,7 @@ document.addEventListener('dblclick', function(event) {
     openMenu();
   });
 
+  playCinematic("intro");   // 최초 1회 인트로 (탭으로 스킵)
   if(!Storage.data.tutorialDone){
     bootInitialBoard();
     showTutorial();
