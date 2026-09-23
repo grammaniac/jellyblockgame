@@ -1112,6 +1112,55 @@
   .friend-art svg{filter:drop-shadow(0 3px 2px rgba(152,122,150,.22));}
   .laughing .boss-brow-left{transform:translateY(-4px) rotate(-8deg);transform-origin:40px 39px;}
   .laughing .boss-eye{transform:scaleY(.65);transform-origin:50px 48px;}
+
+  /* v3.8: three connected regions, clear goals, collectible star seals. */
+  body[data-region="garden"]{background:radial-gradient(ellipse at 15% 25%,#f8d6e9aa,transparent 55%),linear-gradient(168deg,#b6a3bd,#dfcadd 48%,#f8edf3);}
+  body[data-region="boss"]{background:radial-gradient(ellipse at 85% 22%,#d29aaa66,transparent 55%),linear-gradient(168deg,#ab91a6,#d5bbcc 48%,#f5e8ee);}
+  .region-mark{font-size:10px;letter-spacing:.08em;color:#805c75;}
+  .adventure-guide{width:100%;max-width:480px;height:52px;box-sizing:border-box;margin:0 0 8px;padding:7px 12px;border:1px solid #dfc5d3;border-radius:13px;background:rgba(255,249,252,.84);display:flex;gap:10px;align-items:center;}
+  .adventure-guide[hidden]{display:none;}
+  .adventure-guide svg{width:24px;height:24px;flex:none;color:#c2557e;}
+  .adventure-guide strong{display:block;font-size:12px;color:#5a4658;line-height:1.45;}
+  .adventure-guide span{display:block;font-size:10px;color:#765e6e;line-height:1.4;}
+  .adventure-guide.danger{border-color:#c2557e;background:#fff1f5;}
+  .cell.threat-target::before{outline:2px dashed #b84172;outline-offset:-2px;}
+  .cell.invalid-drop::after{content:'×';position:absolute;inset:0;display:grid;place-items:center;border:2px dashed #b84172;border-radius:8px;background:rgba(194,85,126,.16);color:#862d50;font-size:22px;font-weight:900;pointer-events:none;}
+  .cell.threat-target .cbadge{background:#c2557e;color:#fff;}
+  .blk.stone .hpno{background:rgba(75,43,64,.72);border-radius:6px;min-width:12px;text-align:center;font-size:9px;line-height:14px;right:0;top:0;}
+  .ui-icon{display:inline-block;width:22px;height:22px;vertical-align:middle;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;}
+  .bicon .ui-icon{width:23px;height:23px;}
+  .stage-grid{display:block;max-height:49vh;padding:5px;scroll-behavior:auto;}
+  .map-region{position:relative;border:1px solid #e7d1dd;border-radius:24px;margin:0 0 16px;overflow:hidden;background:radial-gradient(ellipse at 85% 30%,#fff9e9,transparent 45%),linear-gradient(150deg,#f5ebee,#edd8e5);}
+  .map-region.garden{background:radial-gradient(ellipse at 15% 40%,#e4c4e1,transparent 45%),linear-gradient(150deg,#f7edf6,#dfc8df);}
+  .map-region.boss{background:radial-gradient(ellipse at 85% 55%,#e2b5c6,transparent 45%),linear-gradient(150deg,#f0e1ea,#dac4d4);}
+  .map-header{position:absolute;top:18px;left:12px;right:12px;z-index:1;text-align:center;}
+  .map-header small{display:block;color:#886879;font-size:10px;letter-spacing:2px;margin-bottom:5px;}
+  .map-header strong{font-size:20px;color:#995070;}
+  .map-header p{font-size:11px;color:#77586e;margin:7px 0;}
+  .map-route{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;}
+  .map-region .stagebtn{position:absolute;width:62px;height:64px;padding:7px 2px 4px;border-radius:45% 45% 40% 40%;transform:translateX(-50%);z-index:2;background:linear-gradient(150deg,#fffcfd,#eadce8);box-shadow:inset 0 2px 2px #fff,0 4px 0 #c6a6bc,0 6px 10px #aa819e33;}
+  .map-region .stagebtn.current{outline:2px solid #c2557e;outline-offset:4px;}
+  .map-region .stagebtn.perfect{background:linear-gradient(140deg,#fff8df,#f3d993);color:#735329;box-shadow:inset 0 2px 2px #fff,0 4px 0 #d0a251;}
+  .map-region .stagebtn.locked{background:#e3d7e0;opacity:.65;filter:none;box-shadow:0 3px 0 #cab6c5;}
+  .map-region .stagebtn:active{transform:translate(-50%,2px);}
+  .map-region .stage-note{font-size:8px;}
+  .map-region .stnum{font-size:17px;}
+  .star-seals{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin:12px 0;}
+  .star-seal{border:1px dashed #c9b1c0;border-radius:999px;padding:7px 9px;color:#876e7f;font-size:10px;}
+  .star-seal.earned{border:1px solid #d9a94c;background:#fff5da;color:#806032;}
+  .friend-card.gilded{border-color:#d9a94c;box-shadow:inset 0 0 0 2px #fff5da;}
+  .collection-note{font-size:11px;color:#806477;line-height:1.6;margin:8px 0;}
+  .friend-art.celebrating svg{animation:charBob .45s ease 3;}
+  .ending-art{display:flex;justify-content:center;gap:6px;margin:14px 0;}
+  .ending-art svg{width:68px;height:82px;filter:drop-shadow(0 3px 3px #a7839c55);}
+  .ending-art .tongue,.ending-art .mouthAngry{display:none;}
+  .ending-art .mouthLaugh{display:block;}
+  .ending-stars{font-size:30px;font-weight:900;color:#bd8d38;margin:8px;}
+  .menu-shortcuts{display:flex;gap:8px;margin:12px 0;}
+  .menu-shortcuts button{flex:1;padding:10px 4px;min-height:44px;border:1px solid #ddc4d1;border-radius:12px;background:#fff8fb;color:#92506c;font:inherit;font-size:12px;font-weight:800;cursor:pointer;}
+  .character-sheet{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;}
+  @media(max-height:720px){.adventure-guide{height:46px;padding:5px 9px}.adventure-guide strong{font-size:11px}.map-region .stagebtn{height:64px}}
+  @media(prefers-reduced-motion:reduce){.friend-art.celebrating svg{animation:none}}
 </style>
 </head>
 <body>
@@ -1131,6 +1180,7 @@
     <div class="objective" id="objective"></div>
   </div>
 
+  <div class="adventure-guide" id="adventureGuide" hidden role="status" aria-live="polite"><div id="guideIcon"></div><div><strong id="guideTitle"></strong><span id="guideDetail"></span></div></div>
   <div class="timerbar" id="timerbar"><div class="fill" id="timerFill"></div></div>
 
   <div class="scorewrap">
@@ -1162,6 +1212,7 @@
       <div class="sub">모드를 선택하세요</div>
       <div class="menu-modes" id="modeList"></div>
       <button class="collection-link" id="friendsBtn">친구들 · 표정과 추억 모으기</button>
+      <div class="menu-shortcuts"><button id="quickDaily">오늘의 퍼즐</button><button id="quickRewards">출석 선물</button><button id="quickAchievements">도전과제</button></div>
       <div class="menu-foot">
         <button class="iconbtn" id="shopBtn" title="상점">🛒</button>
         <button class="iconbtn" id="statsBtn" title="통계">📊</button>
@@ -1221,6 +1272,7 @@
     <div class="modal">
       <h2>젤리 왕국의 친구들</h2>
       <div class="sub">모험에서 만나면 친구 카드가 열려요</div>
+      <div id="collectionRewards"></div>
       <div id="friendCards"></div>
       <div class="film-list" id="filmList"></div>
       <button class="bigbtn secondary" data-close="friendsOverlay">닫기</button>
@@ -1228,6 +1280,17 @@
   </div>
   <div class="char-caption" id="charCaption" role="status" aria-live="polite"></div>
 
+  <div class="overlay" id="endingOverlay"><div class="modal">
+    <div class="region-mark">JELLY QUEST · 모험의 끝, 새로운 시작</div>
+    <h2>젤리 왕국을 지켜냈어요!</h2>
+    <div class="ending-art" id="endingArt"></div>
+    <p class="collection-note">반짝이의 도움, 끄적이의 장난, 부글이의 썩소까지.<br>서른 번의 모험을 함께해 주셔서 고마워요.</p>
+    <div class="ending-stars" id="endingStars"></div>
+    <p class="collection-note" id="endingNext"></p>
+    <button class="bigbtn" id="endingMap">남은 별 모으기</button>
+    <button class="bigbtn secondary" id="endingFriends">친구들과 추억 보기</button>
+    <button class="bigbtn secondary" data-close="endingOverlay">클리어 화면으로</button>
+  </div></div>
   <!-- Pause modal -->
   <div class="overlay" id="pauseOverlay">
     <div class="modal">
@@ -1362,6 +1425,30 @@ document.addEventListener('dblclick', function(event) {
   /* ============================================================
    *  CONSTANTS
    * ============================================================ */
+  const ICON_PATHS={
+    menu:'<path d="M4 6h16M4 12h16M4 18h16"/>',
+    rotate:'<path d="M20 10a8 8 0 1 0-2 8M20 4v6h-6"/>',
+    hammer:'<path d="m5 19 9-9m-4-4 4-4 7 7-4 4zM3 18l3 3"/>',
+    bomb:'<circle cx="11" cy="14" r="7"/><path d="m15 8 2-3 3 1m-1-4 1 1M7 12l1-2"/>',
+    undo:'<path d="M4 5v6h6M4 11c4-7 16-6 16 2 0 5-5 7-10 6"/>',
+    hint:'<path d="M8 16c0-3-3-3-3-7a7 7 0 0 1 14 0c0 4-3 4-3 7M8 17h8M9 21h6M12 5v4"/>',
+    gift:'<path d="M3 9h18v4H3zM5 13v8h14v-8M12 9v12"/><path d="M12 9C1 9 7-2 12 9c5-11 11 0 0 0"/>',
+    trophy:'<path d="M7 3h10v7c0 7-10 7-10 0zM7 5H3v3c0 3 2 4 5 4m9-7h4v3c0 3-2 4-5 4M12 15v5M8 21h8"/>',
+    stats:'<path d="M4 20V12h4v8M10 20V7h4v13M16 20V3h4v17"/>',
+    shop:'<path d="m3 4 2 1 3 12h11l2-9H6M9 21h.01M18 21h.01"/>',
+    settings:'<circle cx="12" cy="12" r="3"/><path d="m12 2 2 3 3-1 1 3 3 2-2 3 2 3-3 2-1 3-3-1-2 3-2-3-3 1-1-3-3-2 2-3-2-3 3-2 1-3 3 1z"/>',
+    help:'<circle cx="12" cy="12" r="9"/><path d="M9 8c0-4 7-3 6 1-1 2-3 1-3 5m0 3h.01"/>',
+    gem:'<path d="m3 8 4-5h10l4 5-9 13zM3 8h18M7 3l5 18 5-18"/>',
+    shield:'<path d="m12 2 8 4v6c0 5-8 10-8 10S4 17 4 12V6zM8 12l3 3 5-6"/>',
+    star:'<path d="m12 2 3 6 7 1-5 5 1 8-6-4-6 4 1-8-5-5 7-1z"/>',
+    fullscreen:'<path d="M4 9V4h5m6 0h5v5m0 6v5h-5m-6 0H4v-5"/>'
+  };
+  function icon(name){return '<svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true">'+(ICON_PATHS[name]||ICON_PATHS.star)+'</svg>';}
+  function installIcons(){
+    const buttons={menuBtn:'menu',newBtn:'rotate',fsBtn:'fullscreen',shopBtn:'shop',statsBtn:'stats',achBtn:'trophy',dailyBtn:'gift',settingsBtn:'settings',howtoBtn:'help'};
+    Object.entries(buttons).forEach(([id,name])=>{const b=document.getElementById(id);if(b){b.innerHTML=icon(name);if(!b.hasAttribute('aria-label'))b.setAttribute('aria-label',b.title);}});
+    document.querySelectorAll('[data-booster] .bicon').forEach(el=>{const id=el.parentElement.dataset.booster;el.innerHTML=icon(id==='refresh'?'rotate':id);});
+  }
   const SIZE = 8;
   const SNAP_RADIUS = 1;
   const TYPE_COLORS = [
@@ -1613,6 +1700,9 @@ document.addEventListener('dblclick', function(event) {
    * - 로드 성공 시 파일 재생, 미로드/실패 시 아래 합성음 폴백 (오프라인 최초 실행 대비)
    * - AudioBuffer는 컨텍스트 독립: rebuildAudio(좀비 대응) 후에도 재사용 가능 */
   const SFX_URL = {
+    placeA:'media/sfx/place_a.mp3',placeB:'media/sfx/place_b.mp3',placeC:'media/sfx/place_c.mp3',
+    clearDouble:'media/sfx/clear_double.mp3',clearTriple:'media/sfx/clear_triple.mp3',
+    stoneCrack:'media/sfx/stone_crack.mp3',stoneBreak:'media/sfx/stone_break.mp3',gemCrack:'media/sfx/gem_crack.mp3',gemBreak:'media/sfx/gem_break.mp3',
     place:"media/sfx/place.mp3", clear:"media/sfx/clear.mp3", fanfare:"media/sfx/fanfare.mp3",
     click:"media/sfx/click.mp3", invalid:"media/sfx/invalid.mp3", coin:"media/sfx/coin.mp3",
     booster:"media/sfx/booster.mp3", rotate:"media/sfx/rotate.mp3", pickup:"media/sfx/pickup.mp3",
@@ -1623,14 +1713,17 @@ document.addEventListener('dblclick', function(event) {
     cineIntro:"media/sfx/cine_intro.m4a", cineGrape:"media/sfx/cine_grape.mp3",
     cineBoss:"media/sfx/cine_boss.mp3"
   };
-  /* 파일은 전부 피크 -1dB 정규화 상태 → 상대 밸런스는 여기서 조정 */
+  /* 인코딩 후 피크 검수 + 재생 음량으로 상대 밸런스 조정 */
   const SFX_VOL = {
+    placeA:.36,placeB:.36,placeC:.36,clearDouble:.45,clearTriple:.48,stoneCrack:.3,stoneBreak:.36,gemCrack:.28,gemBreak:.34,
     place:.5, clear:.55, fanfare:.6, click:.35, invalid:.45, coin:.5, booster:.55,
     rotate:.4, pickup:.4, newpieces:.45, gameover:.55, helperAppear:.55, helperWink:.5,
     villainTease:.6, villainFlee:.55, bossAppear:.6, bossSmirk:.65,
     cineIntro:.65, cineGrape:.6, cineBoss:.65
   };
   const sfxBuf = {};
+  // Existing character/interaction recordings contain quiet lead-ins; align attacks with gestures.
+  const SFX_START={pickup:.38,clear:.12,helperAppear:.09,bossSmirk:.62,villainFlee:.39,booster:.08,coin:.06,gameover:.19};
   const sfxLoads = {};
   function loadSfx(name){
     if(sfxBuf[name]) return Promise.resolve(sfxBuf[name]);
@@ -1660,18 +1753,20 @@ document.addEventListener('dblclick', function(event) {
     if(!Storage.data.settings.sfx) return true;   // 설정 꺼짐: 처리된 것으로 간주(무음)
     const buf = sfxBuf[name];
     if(!buf) return false;                         // 미로드: 호출부가 합성음 폴백
-    if((options.offset || 0)>=buf.duration) return true;
+    const offset=options.offset ?? SFX_START[name] ?? 0;
+    if(offset>=buf.duration) return true;
     try{
       const a=audio(), src=a.createBufferSource(), g=a.createGain();
       src.buffer=buf;
       src.playbackRate.value=options.rate || 1;
-      const voices=activeSfx.get(name) || new Set();
+      const group=options.group || name;
+      const voices=activeSfx.get(group) || new Set();
       if(voices.size>=3){ const oldest=voices.values().next().value; try{oldest.stop();}catch(e){} voices.delete(oldest); }
-      voices.add(src); activeSfx.set(name,voices);
+      voices.add(src); activeSfx.set(group,voices);
       src.onended=()=>{voices.delete(src);src.disconnect();g.disconnect();};
       g.gain.value = (SFX_VOL[name]||0.5)*(options.volume ?? 1);
       src.connect(g).connect(master);
-      src.start(0,options.offset || 0);
+      src.start(0,offset);
       return true;
     }catch(e){ return false; }
   }
@@ -1730,10 +1825,11 @@ document.addEventListener('dblclick', function(event) {
   }
   const S = {
     pickup(){ if(playFile("pickup")) return; tone(520,0.09,"triangle",0.16); tone(820,0.07,"triangle",0.1,0.05); },
-    place(){ const rate=[.96,1,1.04][placeVariant++%3]; if(playFile("place",{rate,volume:.9})) return; tone(220,0.13,"sine",0.26,0,130); noise(0.07,0.14); },
+    place(){ const n=placeVariant++%3,rate=[.96,1,1.04][n]; if(playFile(["placeA","placeB","placeC"][n],{group:"placement"}))return; if(playFile("place",{rate,volume:.9,group:"placement"})) return; tone(220,0.13,"sine",0.26,0,130); noise(0.07,0.14); },
     invalid(){ if(playFile("invalid")) return; tone(150,0.16,"sawtooth",0.16,0,95); tone(120,0.16,"sawtooth",0.12,0.08,80); },
     clear(lines,cmb){
       const tier=Math.min(3,Math.max(1,lines));
+      if(tier>=2 && playFile(tier===2?"clearDouble":"clearTriple")) return;
       if(playFile("clear",{rate:1+(tier-1)*.07,volume:.85})){
         if(tier>=2) tone(659.25,.19,"sine",.07,.07);
         if(tier>=3) tone(987.77,.25,"sine",.06,.14);
@@ -1769,6 +1865,7 @@ document.addEventListener('dblclick', function(event) {
     booster(){ if(playFile("booster")) return; tone(660,0.08,"square",0.14); tone(990,0.08,"sine",0.1,0.06); },
     click(){ if(playFile("click")) return; tone(600,0.06,"square",0.1); },
     obstacle(grape, broken){
+      if(playFile(grape?(broken?"gemBreak":"gemCrack"):(broken?"stoneBreak":"stoneCrack")))return;
       if(grape){tone(broken?1046.5:783.99,.15,"sine",.055);tone(broken?1567.98:987.77,.2,"sine",.035,.045);}
       else{tone(broken?160:240,.1,"triangle",.075,0,90);noise(.045,.045);}
     },
@@ -1912,9 +2009,9 @@ document.addEventListener('dblclick', function(event) {
    * 영상은 음소거 재생(자동재생 정책): 소리는 BGM/효과음이 담당.
    * 로딩 실패·미지원 시 조용히 건너뛴다 (게임 진행을 절대 막지 않음). */
   const CINE = {
-    intro: { url:"media/video/intro.mp4", flag:"cineIntroSeen3", snd:"cineIntro", title:"젤리 왕국에 오신 걸 환영해요", sub:"작은 조각으로 시작하는 반짝이는 모험" },
-    grape: { url:"media/video/transition_grape.mp4", flag:"cineGrapeSeen2", snd:"cineGrape", title:"빛나는 보석의 정원", sub:"보석이 있는 줄을 세 번 지워 주세요" },
-    boss:  { url:"media/video/transition_boss.mp4",  flag:"cineBossSeen2",  snd:"cineBoss", title:"부글이의 역습", sub:"변이하기 전에 그 줄을 지워 막아 주세요" }
+    intro: { url:"media/video/intro_v2.mp4", flag:"cineIntroSeen3", snd:"cineIntro", title:"젤리 왕국에 오신 걸 환영해요", sub:"작은 조각으로 시작하는 반짝이는 모험" },
+    grape: { url:"media/video/transition_grape_v2.mp4", flag:"cineGrapeSeen2", snd:"cineGrape", title:"빛나는 보석의 정원", sub:"보석이 있는 줄을 세 번 지워 주세요" },
+    boss:  { url:"media/video/transition_boss_v2.mp4",  flag:"cineBossSeen2",  snd:"cineBoss", title:"부글이의 역습", sub:"변이하기 전에 그 줄을 지워 막아 주세요" }
   };
   let activeCinematicClose=null;
   function playCinematic(key, replay=false){
@@ -2030,10 +2127,10 @@ document.addEventListener('dblclick', function(event) {
     lastVW = window.innerWidth;
     lastVH = window.innerHeight;
     if(dragData || pending) endGesture();
-    // 화면 크기 변경 시 캐릭터 위치 재계산 (수리 중이면 따라감, 아니면 숨김)
-    if(typeof modeState!=="undefined" && mode==="adventure" && modeState && modeState.kkPending){
-      const kp=modeState.kkPending;
-      setTimeout(()=>{ if(modeState && modeState.kkPending) charFlyToCell("k",kp.r,kp.c,kp.left); }, 80);
+    // Preserve either pending attack when the viewport changes; ignore stale delayed callbacks.
+    if(typeof modeState!=="undefined" && mode==="adventure" && modeState && (modeState.kkPending||modeState.bossPending)){
+      const key=modeState.kkPending?'kkPending':'bossPending',target=modeState[key],type=key==='kkPending'?'k':'r';
+      setTimeout(()=>{if(modeState[key]===target)charFlyToCell(type,target.r,target.c,target.left);},80);
     }else if(typeof hideChars==="function"){
       hideChars();
     }
@@ -2048,6 +2145,7 @@ document.addEventListener('dblclick', function(event) {
     const basePadBottom = parseFloat(bs.paddingBottom);
     let chrome = basePadTop + basePadBottom;
     const chromeEls = [topbarEl, modebarEl, scorewrapEl, boosterbarEl, hintEl];
+    if(!document.getElementById("adventureGuide").hidden) chromeEls.push(document.getElementById("adventureGuide"));
     if(timerBarEl.classList.contains("active")) chromeEls.push(timerBarEl);
     for(const el of chromeEls){
       const cs = getComputedStyle(el);
@@ -2086,7 +2184,7 @@ document.addEventListener('dblclick', function(event) {
         const oldNo = blk.querySelector(".inkno");
         if(oldNo && !(v && v.ink)) oldNo.remove();
         const oldHp = blk.querySelector(".hpno");
-        if(oldHp && !(v && v.cancer)) oldHp.remove();
+        if(oldHp && !(v && v.stone)) oldHp.remove();
         if(v){
           cell.classList.add("filled");
           if(v.ink){
@@ -2109,6 +2207,8 @@ document.addEventListener('dblclick', function(event) {
               else if(v.hp <= 1) blk.classList.add("g1");
             }else if(v.hp <= 1) blk.classList.add("cracked");
             cell.style.setProperty("--c", "#74747e");
+            let hp=blk.querySelector('.hpno');if(!hp){hp=document.createElement('span');hp.className='hpno';blk.appendChild(hp);}hp.textContent=v.hp;
+            cell.setAttribute('aria-label',(v.grape?'보석':v.cancer?'변이 젤리':'돌')+', 남은 내구도 '+v.hp);
           }else if(v.special === SPECIAL_RAINBOW){
             blk.classList.add("rainbow");
             cell.style.setProperty("--c", "#fff");
@@ -2396,7 +2496,7 @@ document.addEventListener('dblclick', function(event) {
   function clearGhost(){
     for(const [r,c] of ghostCells){
       const cell=cellEls[r][c];
-      cell.classList.remove("ghost","gline");
+      cell.classList.remove("ghost","gline","invalid-drop");
     }
     ghostCells=[];
   }
@@ -2423,7 +2523,14 @@ document.addEventListener('dblclick', function(event) {
     if(!dragData) return;
     const shape=dragData.piece.shape;
     const t=findNearestValid(shape,row,col);
-    if(!t){ dragData.target=null; return; }
+    if(!t){
+      dragData.target=null;
+      for(const [r,c] of shape.cells){
+        const rr=row+r,cc=col+c;
+        if(rr>=0&&rr<SIZE&&cc>=0&&cc<SIZE){cellEls[rr][cc].classList.add('invalid-drop');ghostCells.push([rr,cc]);}
+      }
+      return;
+    }
     row=t.row; col=t.col;
     dragData.target=t;
     dragData.float.style.left=(dragData.brect.left+col*dragData.cell)+"px";
@@ -2904,7 +3011,29 @@ document.addEventListener('dblclick', function(event) {
     renderObjective();
   }
 
+  function regionForStage(n){return n>=21?'boss':n>=12?'garden':'kingdom';}
+  function renderAdventureGuide(){
+    const guide=document.getElementById('adventureGuide');
+    const active=mode==='adventure' && modeState && modeState.stage;
+    guide.hidden=!active;
+    if(!active){document.body.dataset.region='kingdom';return;}
+    const st=modeState.stage,left=countStones();document.body.dataset.region=regionForStage(st);
+    let title='장애물 '+left+'개를 모두 지워 주세요',detail='장애물이 있는 가로·세로 줄을 채우면 내구도가 줄어요',symbol='gem';
+    const bp=modeState.bossPending,kp=modeState.kkPending;
+    guide.classList.toggle('danger',!!(bp||kp));
+    if(bp){title='부글이 · '+bp.left+'번 배치 뒤 변이';detail='분홍 테두리 젤리가 있는 줄을 지우면 막을 수 있어요';symbol='shield';}
+    else if(kp){title='끄적이 · '+kp.left+'번 배치 뒤 돌 수리';detail='분홍 테두리 돌을 먼저 부수세요 · 망치로도 막을 수 있어요';symbol='hammer';}
+    else if(st===1 && !Storage.data.firstClearLesson && !Storage.data.adventure.stars[1]){
+      if(!(modeState.used>0)){title='첫걸음 · 아래 조각을 끌어 놓으세요';detail='빈 칸에 놓기 · 조각을 짧게 탭하면 회전해요';symbol='hint';}
+      else{title='다음은 돌이 있는 줄을 채워 보세요';detail='한 줄이 꽉 차면 사라져요 · 금 간 돌은 한 번에 깨져요';}
+    }else if(st>=12 && st<=14){detail='보석은 3번 · 숫자는 앞으로 지워야 하는 횟수예요';}
+    const set=(id,value)=>{const e=document.getElementById(id);if(e.textContent!==value)e.textContent=value;};
+    set('guideTitle',title);set('guideDetail',detail);
+    const pic=document.getElementById('guideIcon');if(pic.dataset.icon!==symbol){pic.innerHTML=icon(symbol);pic.dataset.icon=symbol;}
+    cellEls.forEach((row,r)=>row.forEach((el,c)=>el.classList.toggle('threat-target',!!((bp&&bp.r===r&&bp.c===c)||(kp&&kp.r===r&&kp.c===c)))));
+  }
   function renderObjective(){
+    renderAdventureGuide();
     if(mode === "challenge"){
       objectiveEl.innerHTML = "목표 <b>"+modeState.target+"</b>";
     }else if(mode === "timeattack"){
@@ -3173,6 +3302,7 @@ document.addEventListener('dblclick', function(event) {
         const stars = used <= par ? 3 : used <= par+5 ? 2 : 1;
         const adv = Storage.data.adventure;
         const first = !adv.stars[st];
+        const oldStars=totalStars();
         let reward = 15 + st*2 + stars*8;
         if(first) reward *= 2; // 첫 클리어 2배
         Storage.data.coins += reward;
@@ -3181,6 +3311,7 @@ document.addEventListener('dblclick', function(event) {
           adv.unlocked = st + 1;
         }
         Storage.data.stats.gamesPlayed++;
+        if(st===1) Storage.data.firstClearLesson=true;
         Storage.data.savedRun = null;
         Storage.save();
         hideChars();
@@ -3193,7 +3324,13 @@ document.addEventListener('dblclick', function(event) {
         );
         const nb = document.getElementById("nextStageBtn");
         nb.style.display = (st < STAGES.length) ? "" : "none";
-        setTimeout(()=>starBurst(stars), 280); // 별이 이마로 날아온다!
+        setTimeout(()=>starBurst(stars), 280);
+        const earned=STAR_SEALS.filter(x=>oldStars<x.at && totalStars()>=x.at);
+        if(earned.length) document.getElementById('rewardBox').textContent+=' · '+earned.map(x=>x.name+' 획득!').join(' · ');
+        if(st===STAGES.length){
+          nb.style.display='';nb.textContent='모험의 마지막 인사';nb.dataset.ending='true';
+          document.getElementById('goverTitle').textContent='30단계, 모든 모험을 마쳤어요!';
+        }else{nb.textContent='다음 스테이지 ▶';delete nb.dataset.ending;}
         return true;
       }
     },
@@ -3367,6 +3504,7 @@ document.addEventListener('dblclick', function(event) {
     // 챕터 경계 시네마틱 (최초 1회): 21+ 보스 등장, 12+ 포도 보석
     if(n>=21) playCinematic("boss");
     else if(n>=12) playCinematic("grape");
+    resize();
   }
 
 
@@ -3384,6 +3522,7 @@ document.addEventListener('dblclick', function(event) {
     +'<ellipse cx="42" cy="34" rx="9" ry="5" fill="rgba(255,255,255,.55)" transform="rotate(-18 42 34)"/>'
     +'</svg>';
   function starBurst(n){
+    if(document.getElementById('endingOverlay').classList.contains('show'))return;
     const layer=document.getElementById("starBurst");
     layer.innerHTML="";
     layer.classList.remove("fade");
@@ -3396,7 +3535,7 @@ document.addEventListener('dblclick', function(event) {
       d.style.animationDelay=(i*0.3)+"s";
       d.innerHTML=STAR_SVG;
       layer.appendChild(d);
-      setTimeout(()=>{ S.booster(); vibrate(12); }, 350+i*300);
+      setTimeout(()=>{ tone([659.25,783.99,1046.5][i],.18,"sine",.07); vibrate(12); }, 350+i*300);
     }
     setTimeout(()=>layer.classList.add("fade"), 2000+n*150);
     setTimeout(()=>{ layer.classList.remove("show","fade"); layer.innerHTML=""; }, 2700+n*150);
@@ -3557,6 +3696,7 @@ document.addEventListener('dblclick', function(event) {
     const b=el.querySelector(".cbadge");
     if(badge!=null){ b.style.display=""; b.textContent=badge; }
     else b.style.display="none";
+    renderAdventureGuide();
   }
   function charFlyToCell(type, r, c, badge){
     charFlyToRect(type, cellEls[r][c].getBoundingClientRect(), badge);
@@ -3586,7 +3726,7 @@ document.addEventListener('dblclick', function(event) {
   function charWinkOut(type){
     const el=charEls[type];
     if(!el){ return; }
-    characterCaption(type,["또 도와줄게!","반짝! 잘하고 있어!"]);
+    characterCaption(type,["또 도와줄게!","반짝! 잘하고 있어!","이번에도 멋졌어!","우리 함께 해보자!"]);
     el.classList.add("zoom");
     setTimeout(()=>{ el.classList.add("winking"); S.helperWink(); }, 200);
     setTimeout(()=>{
@@ -3599,7 +3739,7 @@ document.addEventListener('dblclick', function(event) {
   function charTeaseOut(){
     const el=charEls.k;
     if(!el){ return; }
-    characterCaption("k",["메롱~ 잡아봐!","내 장난 어때?"]);
+    characterCaption("k",["메롱~ 잡아봐!","내 장난 어때?","히히, 여기 봐!","이번엔 내가 이겼지?"]);
     el.classList.add("teasing");
     S.villainTease();
     setTimeout(()=>{
@@ -3755,7 +3895,7 @@ document.addEventListener('dblclick', function(event) {
   function charLaughOut(){
     const el=charEls.r;
     if(!el) return;
-    characterCaption("r",["흐흐, 내 차례야!","부글부글… 성공이군!"]);
+    characterCaption("r",["흐흐, 내 차례야!","부글부글… 성공이군!","내 작전 어때?","다음 수도 준비됐지!"]);
     el.classList.add("zoom","laughing");
     S.bossSmirk();
     setTimeout(()=>{
@@ -3840,6 +3980,7 @@ document.addEventListener('dblclick', function(event) {
       }
     }
     if(changed) renderBoard();
+    renderAdventureGuide();
   }
 
   /* ----- 매 배치마다: 등장 스케줄 ----- */
@@ -3880,58 +4021,36 @@ document.addEventListener('dblclick', function(event) {
     }
   }
 
+  const REGIONS=[
+    {id:'kingdom',first:1,last:11,title:'젤리 왕국',chapter:'CHAPTER 1',detail:'말랑한 조각으로 여는 첫 모험'},
+    {id:'garden',first:12,last:20,title:'보석의 정원',chapter:'CHAPTER 1 · 깊은 숲',detail:'반짝이는 보석에 숨은 길을 찾아요'},
+    {id:'boss',first:21,last:30,title:'부글이의 역습',chapter:'CHAPTER 2',detail:'예고를 읽고, 변이를 막아 주세요'}
+  ];
+  function totalStars(){return STAGES.reduce((sum,_,i)=>sum+Math.max(0,Math.min(3,Number(Storage.data.adventure.stars[i+1])||0)),0);}
+  const STAR_SEALS=[{at:15,name:'반짝이는 첫걸음'},{at:45,name:'황금빛 친구 카드'},{at:90,name:'왕국의 별 수호자'}];
+  function sealMarkup(){const total=totalStars();return '<div class="star-seals">'+STAR_SEALS.map(x=>'<span class="star-seal '+(total>=x.at?'earned':'')+'">'+(total>=x.at?'✦ ':'☆ ')+x.name+' · '+x.at+'</span>').join('')+'</div>';}
   function renderStageSelect(){
-    const grid=document.getElementById("stageGrid");
-    grid.innerHTML="";
-    const adv=Storage.data.adventure;
-    const total=STAGES.reduce((n,_,i)=>n+Math.max(0,Math.min(3,Number(adv.stars[i+1])||0)),0);
-    const next=nextAdventureStage();
-    document.getElementById("starSummary").innerHTML='<strong>★ '+total+' / '+STAGES.length*3+'</strong><small>'+(total===90?'모든 별을 모았어요! 젤리 왕국의 완벽한 모험가예요.':next?'다음 모험은 '+next+'단계 · 빈 별을 채워 나만의 모험을 완성해요.':'모든 스테이지 클리어! 빈 별을 채워 모험을 완성해요.')+'</small><div class="star-meter" role="progressbar" aria-label="모은 별" aria-valuemin="0" aria-valuemax="90" aria-valuenow="'+total+'"><span style="width:'+total/90*100+'%"></span></div>';
-    STAGES.forEach((st,i)=>{
-      const n=i+1;
-      if(n===1){
-        const lb=document.createElement("div");
-        lb.className="chapterlbl";
-        lb.textContent="챕터 1 · 젤리 왕국";
-        grid.appendChild(lb);
-      }
-      if(n===12){
-        const lb=document.createElement("div");lb.className="chapterlbl";
-        lb.innerHTML='보석의 정원<small>젤리 왕국 깊은 곳 · 세 번 깨는 보석이 나타나요</small>';grid.appendChild(lb);
-      }
-      if(n===21){
-        const lb=document.createElement("div");
-        lb.className="chapterlbl";
-        lb.textContent="챕터 2 · 부글이의 역습 🔴";
-        grid.appendChild(lb);
-      }
-      const locked = n > adv.unlocked;
-      const stars = adv.stars[n]||0;
-      const b=document.createElement("button");
-      b.className="stagebtn"+(locked?" locked":"")+(stars===3?" perfect":"")+(n===next?" current":"");
-      b.disabled=locked;
-      b.setAttribute("aria-label",n+"단계, "+(locked?"잠김":stars+" / 3별"));
-      if(n===next) b.setAttribute("aria-current","step");
-      const num=document.createElement("div");
-      num.className="stnum";
-      num.textContent = locked ? "🔒" : n;
-      const ss=document.createElement("div");
-      ss.className="ststars";
-      ss.textContent = locked ? "" : "★".repeat(stars)+"☆".repeat(3-stars);
-      b.appendChild(num); b.appendChild(ss);
-      if(!locked){const note=document.createElement("div");note.className="stage-note";note.textContent=n===next?"다음 모험":stars===3?"완벽해요":stars?"별 모으기":"도전하기";b.appendChild(note);}
-      if(!locked){
-        b.addEventListener("click",()=>{
-          audio(); S.click();
-          document.getElementById("stageOverlay").classList.remove("show");
-          document.getElementById("launchOverlay").classList.remove("show");
-          menuEl.classList.remove("show");
-          paused=false;
-          Storage.data.savedRun=null;
-          startStage(n);
-        });
-      }
-      grid.appendChild(b);
+    const grid=document.getElementById('stageGrid');grid.replaceChildren();
+    const adv=Storage.data.adventure,total=totalStars(),next=nextAdventureStage();
+    document.getElementById('starSummary').innerHTML='<strong>★ '+total+' / 90</strong><small>'+(total===90?'모든 별을 모았어요! 왕국의 별 수호자예요.':next?'다음 모험은 '+next+'단계 · 길을 따라 별을 모아 주세요.':'서른 단계의 모험 완료! 남은 별을 찾아볼까요?')+'</small><div class="star-meter" role="progressbar" aria-label="모은 별" aria-valuemin="0" aria-valuemax="90" aria-valuenow="'+total+'"><span style="width:'+total/90*100+'%"></span></div>';
+    REGIONS.forEach(region=>{
+      const area=document.createElement('section');area.className='map-region '+region.id;
+      const count=region.last-region.first+1,h=144+count*72;area.style.height=h+'px';
+      const regionStars=Array.from({length:count},(_,i)=>adv.stars[region.first+i]||0).reduce((a,b)=>a+b,0);
+      area.innerHTML='<div class="map-header"><small>'+region.chapter+'</small><strong>'+region.title+'</strong><p>'+region.detail+' · ★ '+regionStars+'/'+count*3+'</p></div>';
+      const points=Array.from({length:count},(_,i)=>({x:[64,140,216,140][i%4],y:146+i*72}));
+      let route='M '+points[0].x+' '+points[0].y;
+      for(let i=1;i<count;i++){const a=points[i-1],b=points[i];route+=' C '+a.x+' '+(a.y+38)+' '+b.x+' '+(b.y-38)+' '+b.x+' '+b.y;}
+      area.insertAdjacentHTML('beforeend','<svg class="map-route" viewBox="0 0 280 '+h+'" preserveAspectRatio="none" aria-hidden="true"><path d="'+route+'" fill="none" stroke="#fff7fb" stroke-width="12"/><path d="'+route+'" fill="none" stroke="#d9a94c" stroke-opacity=".55" stroke-width="3" stroke-dasharray="3 8"/><g fill="none" stroke="#cda1b9" stroke-opacity=".45"><path d="m24 212 12-26 12 26-12 27zM235 380l15-34 15 34-15 30zM24 580l12-26 12 26-12 27z"/></g></svg>');
+      points.forEach((point,i)=>{
+        const n=region.first+i,locked=n>adv.unlocked,stars=Math.max(0,Math.min(3,Number(adv.stars[n])||0));
+        const b=document.createElement('button');b.className='stagebtn'+(locked?' locked':'')+(stars===3?' perfect':'')+(n===next?' current':'');b.disabled=locked;
+        b.style.left=point.x/280*100+'%';b.style.top=point.y-30+'px';b.dataset.stage=n;
+        b.setAttribute('aria-label',n+'단계, '+(locked?'잠김':stars+' / 3별'));if(n===next)b.setAttribute('aria-current','step');
+        b.innerHTML='<div class="stnum">'+(locked?'·':n)+'</div><div class="ststars">'+(locked?'잠김':'★'.repeat(stars)+'☆'.repeat(3-stars))+'</div><div class="stage-note">'+(locked?'':n===next?'다음 모험':stars===3?'완벽해요':stars?'별 모으기':'도전하기')+'</div>';
+        if(!locked)b.addEventListener('click',()=>{audio();S.click();['stageOverlay','launchOverlay','endingOverlay','overlay'].forEach(id=>document.getElementById(id).classList.remove('show'));menuEl.classList.remove('show');paused=false;Storage.data.savedRun=null;startStage(n);});
+        area.appendChild(b);
+      });grid.appendChild(area);
     });
   }
   const FRIENDS=[
@@ -3941,9 +4060,11 @@ document.addEventListener('dblclick', function(event) {
   ];
   function renderFriends(){
     const cards=document.getElementById("friendCards");cards.replaceChildren();
+    const stars=totalStars();
+    document.getElementById('collectionRewards').innerHTML=sealMarkup()+'<p class="collection-note">'+(stars>=90?'90별 완성! 친구들의 축하 인사가 열렸어요.':stars>=45?'황금빛 카드 테두리 획득! 90별에서 축하 인사가 열려요.':stars>=15?'첫걸음 인장 획득! 45별에서 황금빛 카드가 열려요.':'15별부터 모험 인장을 모을 수 있어요.')+'</p>';
     FRIENDS.forEach(f=>{
       const met=!!Storage.data["charIntro_"+f.id];
-      const card=document.createElement("div");card.className="friend-card";
+      const card=document.createElement("div");card.className="friend-card"+(stars>=45?" gilded":"");
       card.innerHTML='<div class="friend-art '+(met?'':'locked')+'" aria-hidden="true">'+characterArt(f.id,'card-'+f.id)+'</div><div><h3>'+(met?f.name:'아직 만나지 못한 친구')+'</h3><p>'+(met?f.desc:f.stage+'단계부터 모험 속에서 만날 수 있어요.')+'</p></div>';
       if(met){
         const btn=document.createElement("button");btn.textContent=f.label;
@@ -3952,6 +4073,7 @@ document.addEventListener('dblclick', function(event) {
           clearTimeout(art.poseTimer);art.classList.remove(f.pose);void art.offsetWidth;art.classList.add(f.pose);
           art.poseTimer=setTimeout(()=>art.classList.remove(f.pose),1400);
         });card.lastElementChild.appendChild(btn);
+        if(stars>=90){const cheer=document.createElement('button');cheer.textContent='축하 인사';cheer.style.marginLeft='6px';cheer.addEventListener('click',()=>{const art=card.querySelector('.friend-art');clearTimeout(art.cheerTimer);art.classList.remove('celebrating');void art.offsetWidth;art.classList.add('celebrating');S.coin();art.cheerTimer=setTimeout(()=>art.classList.remove('celebrating'),1500);});card.lastElementChild.appendChild(cheer);}
       }
       cards.appendChild(card);
     });
@@ -3968,6 +4090,7 @@ document.addEventListener('dblclick', function(event) {
   function openStageSelect(){
     renderStageSelect();
     document.getElementById("stageOverlay").classList.add("show");
+    requestAnimationFrame(()=>{const grid=document.getElementById('stageGrid'),current=grid.querySelector('.current');if(current)grid.scrollTop=Math.max(0,current.offsetTop+current.parentElement.offsetTop-grid.offsetTop-120);});
   }
 
   function startMode(m){
@@ -3978,6 +4101,7 @@ document.addEventListener('dblclick', function(event) {
     newGame();
     MODES[m].init();
     renderObjective();
+    resize();
   }
 
   function checkModeWin(){
@@ -4013,6 +4137,7 @@ document.addEventListener('dblclick', function(event) {
 
   function showOverlay(title, sub, reward){
     document.getElementById("nextStageBtn").style.display = "none";
+    delete document.getElementById("nextStageBtn").dataset.ending;
     document.getElementById("goverTitle").textContent = title;
     document.getElementById("goverSub").textContent = sub;
     document.getElementById("finalScore").textContent = score;
@@ -4072,6 +4197,7 @@ document.addEventListener('dblclick', function(event) {
     updateHud();
     renderObjective();
     updateBGM();
+    resize();
     return true;
   }
 
@@ -4099,9 +4225,9 @@ document.addEventListener('dblclick', function(event) {
    *  TUTORIAL
    * ============================================================ */
   const tutSteps = [
-    { title:"환영합니다!", body:"젤리 퀘스트에 오신 것을 환영합니다. 트레이의 블록을 드래그해서 보드에 놓아보세요." },
-    { title:"줄을 채우세요", body:"가로 또는 세로 한 줄을 가득 채우면 사라지며 점수를 얻습니다. 콤보를 노려보세요!" },
-    { title:"특수 능력", body:"같은 색으로 줄을 채우면 보너스! 🌈 무지개 블록은 가로/세로를 모두 지웁니다. ⭐ 황금 블록은 추가 점수." },
+    { title:"① 조각을 놓아요", body:"아래 조각을 빈 칸으로 끌어 놓으세요. 조각을 짧게 탭하면 돌아가요. 첫 판에서도 안내를 계속 보여드릴게요." },
+    { title:"② 줄을 채워요", body:"가로 또는 세로 한 줄을 빈틈없이 채우세요. 완성된 줄의 젤리가 사라져요. 돌이 있는 줄을 노려 보세요!" },
+    { title:"③ 장애물을 없애요", body:"돌이 있는 줄을 지우면 숫자가 하나 줄어요. 숫자가 0이 되면 장애물이 사라집니다. 모두 없애면 성공!" },
     { title:"부스터 활용", body:"코인으로 부스터를 사용하세요. 🔨 망치는 단일 블록 제거, 💣 폭탄은 3x3 제거, 💡 힌트는 배치 위치 표시!" },
     { title:"모험 모드 🗺️", body:"보드에 깔린 돌을 모두 부수면 스테이지 클리어! 돌이 포함된 줄을 지우면 돌에 금이 가고, 한 번 더 지우면 깨져요. 적은 조각으로 깰수록 별이 올라가요." },
   ];
@@ -4369,6 +4495,19 @@ document.addEventListener('dblclick', function(event) {
   /* ============================================================
    *  BUTTONS
    * ============================================================ */
+  function showEnding(){
+    document.getElementById('starBurst').classList.remove('show');
+    const total=totalStars();
+    document.getElementById('endingArt').innerHTML=['b','k','r'].map(t=>characterArt(t,'ending-'+t)).join('');
+    document.getElementById('endingStars').textContent='★ '+total+' / 90';
+    document.getElementById('endingNext').textContent=total===90?'모든 별과 인장을 모았어요. 친구 도감에 특별한 축하 인사가 기다려요.':'아직 '+(90-total)+'개의 별이 기다리고 있어요. 모험 지도의 빈 별을 채우고 친구 카드를 꾸며 보세요.';
+    document.getElementById('endingOverlay').classList.add('show');
+  }
+  document.getElementById('endingMap').addEventListener('click',()=>{document.getElementById('endingOverlay').classList.remove('show');openStageSelect();});
+  document.getElementById('endingFriends').addEventListener('click',()=>{document.getElementById('endingOverlay').classList.remove('show');renderFriends();document.getElementById('friendsOverlay').classList.add('show');});
+  document.getElementById('quickDaily').addEventListener('click',()=>{audio();S.click();menuEl.classList.remove('show');paused=false;startMode('daily');});
+  document.getElementById('quickRewards').addEventListener('click',()=>document.getElementById('dailyBtn').click());
+  document.getElementById('quickAchievements').addEventListener('click',()=>document.getElementById('achBtn').click());
   function restartGame(){
     // 모험 모드는 빈 보드가 아니라 현재 스테이지를 다시 시작해야 한다
     if(mode==="adventure" && modeState && modeState.stage) startStage(modeState.stage);
@@ -4382,6 +4521,7 @@ document.addEventListener('dblclick', function(event) {
   });
   document.getElementById("nextStageBtn").addEventListener("click",()=>{
     audio(); S.click();
+    if(document.getElementById('nextStageBtn').dataset.ending==='true'){showEnding();return;}
     overlayEl.classList.remove("show");
     if(modeState && modeState.stage && modeState.stage < STAGES.length){
       startStage(modeState.stage + 1);
@@ -4564,7 +4704,7 @@ document.addEventListener('dblclick', function(event) {
 
     const onFsChange = ()=>{
       const fs = isFs();
-      fsBtn.innerHTML = fs ? "🗗" : "⛶";
+      fsBtn.innerHTML = icon("fullscreen");
       document.body.classList.toggle("fs-active", fs);
       resize();
     };
@@ -4678,6 +4818,7 @@ document.addEventListener('dblclick', function(event) {
    *  BOOT
    * ============================================================ */
   Storage.load();
+  installIcons();
   applyTheme();
   buildBoard();
   setupBoosters();

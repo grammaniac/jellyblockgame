@@ -5,7 +5,7 @@
  *  - 그 외 동일 출처 자산은 cache-first
  *  - 새 버전 배포 시: CACHE 버전을 올리면 클라이언트에 업데이트 바가 뜬다
  */
-const CACHE = "wbq-v3.7.0";
+const CACHE = "wbq-v3.8.0";
 const ASSETS = [
   "./",
   "./index.html",
@@ -16,6 +16,16 @@ const ASSETS = [
   "./icon-maskable-512.png",
   "./apple-touch-icon.png",
   "./media/title.jpg",
+  "./media/sfx/place_a.mp3",
+  "./media/sfx/place_b.mp3",
+  "./media/sfx/place_c.mp3",
+  "./media/sfx/clear_double.mp3",
+  "./media/sfx/clear_triple.mp3",
+  "./media/sfx/stone_crack.mp3",
+  "./media/sfx/stone_break.mp3",
+  "./media/sfx/gem_crack.mp3",
+  "./media/sfx/gem_break.mp3",
+
   "./media/sfx/cine_intro.m4a","./media/sfx/cine_grape.mp3","./media/sfx/cine_boss.mp3",
   // 효과음(소용량)은 프리캐시 → 오프라인에서도 소리 보장.
   // BGM(6.6MB)·영상(1.8MB)은 첫 재생 시 런타임 캐시(아래 fetch 핸들러의 cache-first).
